@@ -31,8 +31,9 @@ class RegisterFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentRegisterBinding.inflate(inflater, container, false)
+
         val factory = AuthViewModelFactory(AuthRepository(requireContext()))
-        authViewModel = ViewModelProvider(this, factory).get(AuthViewModel::class.java)
+        authViewModel = ViewModelProvider(this, factory)[AuthViewModel::class.java]
 
         binding.selectImageButton.setOnClickListener {
             imagePickerLauncher.launch("image/*")
@@ -52,7 +53,7 @@ class RegisterFragment : Fragment() {
             }
         }
 
-        authViewModel.registrationResult.observe(viewLifecycleOwner) { result ->
+        authViewModel.registerResult.observe(viewLifecycleOwner) { result ->
             if (result.success) {
                 Toast.makeText(requireContext(), "Registration successful! Please login.", Toast.LENGTH_SHORT).show()
                 parentFragmentManager.popBackStack()

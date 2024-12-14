@@ -3,23 +3,23 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/nav_home">
+    app:startDestination="@+id/nav_my_records">
 
     <fragment
-        android:id="@+id/nav_home"
-        android:name="com.example.safesound.ui.home.HomeFragment"
-        android:label="@string/menu_home"
-        tools:layout="@layout/fragment_home" />
+        android:id="@+id/nav_my_records"
+        android:name="com.example.safesound.ui.my_records.MyRecordsFragment"
+        android:label="@string/menu_my_records"
+        tools:layout="@layout/fragment_my_records" />
 
     <fragment
-        android:id="@+id/nav_gallery"
-        android:name="com.example.safesound.ui.gallery.GalleryFragment"
-        android:label="@string/menu_gallery"
-        tools:layout="@layout/fragment_gallery" />
+        android:id="@+id/nav_shared_records"
+        android:name="com.example.safesound.ui.shared_records.SharedRecordsFragment"
+        android:label="@string/menu_shared_records"
+        tools:layout="@layout/fragment_shared_records" />
 
     <fragment
-        android:id="@+id/nav_slideshow"
-        android:name="com.example.safesound.ui.slideshow.SlideshowFragment"
-        android:label="@string/menu_slideshow"
-        tools:layout="@layout/fragment_slideshow" />
+        android:id="@+id/nav_records_map"
+        android:name="com.example.safesound.ui.records_map.RecordsMapFragment"
+        android:label="@string/menu_records_map"
+        tools:layout="@layout/fragment_records_map" />
 </navigation>

@@ -52,6 +52,7 @@ dependencies {
     implementation(libs.retrofit.gson)
     implementation(libs.coroutines.core)
     implementation(libs.coroutines.android)
+    implementation(libs.androidx.security.crypto.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

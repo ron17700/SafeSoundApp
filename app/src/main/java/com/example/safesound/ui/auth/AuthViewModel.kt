@@ -1,34 +1,53 @@
 package com.example.safesound.ui.auth
 
 import android.net.Uri
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import com.example.safesound.data.AuthRepository
 import com.example.safesound.utils.Result
 import kotlinx.coroutines.launch
 
 class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
 
+    private val _authState = MutableLiveData<Boolean>()
+    val authState: LiveData<Boolean> get() = _authState
+
     private val _loginResult = MutableLiveData<Result>()
     val loginResult: LiveData<Result> get() = _loginResult
 
-    private val _registrationResult = MutableLiveData<Result>()
-    val registrationResult: LiveData<Result> get() = _registrationResult
+    private val _registerResult = MutableLiveData<Result>()
+    val registerResult: LiveData<Result> get() = _registerResult
+
+    private val _logoutResult = MutableLiveData<Result>()
+    val logoutResult: LiveData<Result> get() = _logoutResult
+
+    fun checkUserLoggedIn() {
+        _authState.postValue(authRepository.isUserLoggedIn())
+    }
 
     fun login(email: String, password: String) {
         viewModelScope.launch {
             val result = authRepository.login(email, password)
             _loginResult.postValue(result)
+            if (result.success) {
+                _authState.postValue(true)
+            }
         }
     }
 
-    fun register(email: String, password: String, profileImageUri: Uri?) {
+    fun register(email: String, password: String, profileImage: Uri?) {
         viewModelScope.launch {
-            val result = authRepository.register(email, password, profileImageUri)
-            _registrationResult.postValue(result)
+            val result = authRepository.register(email, password, profileImage)
+            _registerResult.postValue(result)
+        }
+    }
+
+    fun logout() {
+        viewModelScope.launch {
+            val result = authRepository.logout()
+            _logoutResult.postValue(result)
+            if (result.success) {
+                _authState.postValue(false)
+            }
         }
     }
 }
