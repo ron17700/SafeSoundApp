@@ -12,6 +12,7 @@ lifecycleLivedataKtx = "2.6.1"
 lifecycleViewmodelKtx = "2.6.1"
 navigationFragmentKtx = "2.6.0"
 navigationUiKtx = "2.6.0"
+securityCryptoKtx = "1.0.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -29,6 +30,7 @@ retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version = "2.9
 retrofit-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version = "2.9.0" }
 coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version = "1.7.3" }
 coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version = "1.7.3" }
+androidx-security-crypto-ktx = { group = "androidx.security", name = "security-crypto-ktx", version = "1.1.0-alpha06" }
 
 
 [plugins]
