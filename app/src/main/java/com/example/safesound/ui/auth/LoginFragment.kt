@@ -7,25 +7,24 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.viewModels
 import com.example.safesound.R
-import com.example.safesound.data.AuthRepository
 import com.example.safesound.databinding.FragmentLoginBinding
 import com.example.safesound.ui.main.MainActivity
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class LoginFragment : Fragment() {
     private var _binding: FragmentLoginBinding? = null
     private val binding get() = _binding!!
 
-    private lateinit var authViewModel: AuthViewModel
+    private val authViewModel: AuthViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentLoginBinding.inflate(inflater, container, false)
-        val factory = AuthViewModelFactory(AuthRepository(requireContext()))
-        authViewModel = ViewModelProvider(this, factory).get(AuthViewModel::class.java)
 
         binding.loginButton.setOnClickListener {
             val email = binding.emailEditText.text.toString()

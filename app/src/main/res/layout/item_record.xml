@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="16dp">
+
+    <!-- Icon representing the class -->
+    <ImageView
+        android:id="@+id/imageViewClassIcon"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginEnd="16dp"
+        android:contentDescription="Class Icon"
+        android:src="@drawable/ic_menu_camera"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+    <!-- Record Name and Date -->
+    <LinearLayout
+        android:id="@+id/linearLayoutRecordDetails"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintStart_toEndOf="@id/imageViewClassIcon"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/imageViewRecordPhoto"
+        android:layout_marginEnd="16dp">
+
+        <TextView
+            android:id="@+id/textViewRecordName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Record Name"
+            android:textAppearance="?attr/textAppearanceSubtitle1"
+            android:textColor="@color/black"
+            android:lineSpacingExtra="8dp" />
+
+        <TextView
+            android:id="@+id/textViewCreatedDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Created Date"
+            android:textAppearance="?attr/textAppearanceCaption"
+            android:textColor="@android:color/darker_gray"
+            android:layout_marginTop="4dp" />
+
+
+    </LinearLayout>
+
+    <!-- Record Photo -->
+    <ImageView
+        android:id="@+id/imageViewRecordPhoto"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:contentDescription="Record Photo"
+        android:scaleType="centerCrop"
+        android:src="@drawable/ic_menu_camera"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

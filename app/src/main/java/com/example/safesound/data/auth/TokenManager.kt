@@ -1,4 +1,4 @@
-package com.example.safesound.data
+package com.example.safesound.data.auth
 
 import android.content.Context
 import android.content.SharedPreferences
@@ -6,12 +6,19 @@ import android.util.Base64
 import android.util.Log
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
+import dagger.hilt.android.qualifiers.ApplicationContext
 import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.Response
+import javax.inject.Inject
+import javax.inject.Named
+import javax.inject.Singleton
 
-class TokenManager(private val context: Context, private val authApi: AuthApiService) {
-
+@Singleton
+class TokenManager @Inject constructor(
+    @ApplicationContext private val context: Context,
+    @Named("unsecureAuthApi") private val unsecureAuthApi: AuthApiService,
+) {
     companion object {
         private const val PREFS_FILENAME = "SafeSoundPrefs"
         private const val ACCESS_TOKEN_KEY = "accessToken"
@@ -81,12 +88,12 @@ class TokenManager(private val context: Context, private val authApi: AuthApiSer
     fun refreshToken(): Boolean {
         val refreshToken = getRefreshToken() ?: return false
         return try {
-            val call: Call<AuthResponse> = authApi.refreshTokenSync(RefreshTokenRequest(refreshToken))
+            val call: Call<AuthResponse> = unsecureAuthApi.refreshTokenSync(RefreshTokenRequest(refreshToken))
             val response: Response<AuthResponse> = call.execute()
             if (response.isSuccessful) {
                 val authResponse = response.body()
-                if (authResponse?.accessToken != null && authResponse.refreshToken != null) {
-                    saveTokens(authResponse.accessToken, authResponse.refreshToken)
+                if (authResponse?.accessToken != null) {
+                    saveTokens(authResponse.accessToken, refreshToken)
                     Log.d("TokenManager", "Token refresh successful")
                     true
                 } else {

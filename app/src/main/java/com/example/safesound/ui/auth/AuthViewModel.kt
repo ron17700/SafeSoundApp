@@ -2,23 +2,28 @@ package com.example.safesound.ui.auth
 
 import android.net.Uri
 import androidx.lifecycle.*
-import com.example.safesound.data.AuthRepository
+import com.example.safesound.data.auth.AuthRepository
+import com.example.safesound.data.auth.AuthResponse
 import com.example.safesound.utils.Result
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
+@HiltViewModel
+class AuthViewModel @Inject constructor(
+    private val authRepository: AuthRepository) : ViewModel() {
 
     private val _authState = MutableLiveData<Boolean>()
     val authState: LiveData<Boolean> get() = _authState
 
-    private val _loginResult = MutableLiveData<Result>()
-    val loginResult: LiveData<Result> get() = _loginResult
+    private val _loginResult = MutableLiveData<Result<AuthResponse>>()
+    val loginResult: LiveData<Result<AuthResponse>> get() = _loginResult
 
-    private val _registerResult = MutableLiveData<Result>()
-    val registerResult: LiveData<Result> get() = _registerResult
+    private val _registerResult = MutableLiveData<Result<AuthResponse>>()
+    val registerResult: LiveData<Result<AuthResponse>> get() = _registerResult
 
-    private val _logoutResult = MutableLiveData<Result>()
-    val logoutResult: LiveData<Result> get() = _logoutResult
+    private val _logoutResult = MutableLiveData<Result<AuthResponse>>()
+    val logoutResult: LiveData<Result<AuthResponse>> get() = _logoutResult
 
     fun checkUserLoggedIn() {
         _authState.postValue(authRepository.isUserLoggedIn())
@@ -49,15 +54,5 @@ class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
                 _authState.postValue(false)
             }
         }
-    }
-}
-
-class AuthViewModelFactory(private val authRepository: AuthRepository) : ViewModelProvider.Factory {
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(AuthViewModel::class.java)) {
-            @Suppress("UNCHECKED_CAST")
-            return AuthViewModel(authRepository) as T
-        }
-        throw IllegalArgumentException("Unknown ViewModel class")
     }
 }

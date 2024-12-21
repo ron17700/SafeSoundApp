@@ -8,15 +8,16 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
-import com.example.safesound.data.AuthRepository
+import androidx.fragment.app.viewModels
 import com.example.safesound.databinding.FragmentRegisterBinding
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class RegisterFragment : Fragment() {
     private var _binding: FragmentRegisterBinding? = null
     private val binding get() = _binding!!
 
-    private lateinit var authViewModel: AuthViewModel
+    private val authViewModel: AuthViewModel by viewModels()
     private var profileImageUri: Uri? = null
 
     private val imagePickerLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
@@ -31,9 +32,6 @@ class RegisterFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentRegisterBinding.inflate(inflater, container, false)
-
-        val factory = AuthViewModelFactory(AuthRepository(requireContext()))
-        authViewModel = ViewModelProvider(this, factory)[AuthViewModel::class.java]
 
         binding.selectImageButton.setOnClickListener {
             imagePickerLauncher.launch("image/*")

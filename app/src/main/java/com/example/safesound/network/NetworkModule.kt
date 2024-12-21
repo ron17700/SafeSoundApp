@@ -1,37 +1,85 @@
 package com.example.safesound.network
 
-import android.content.Context
+import com.example.safesound.data.auth.AuthApiService
+import com.example.safesound.data.my_records.RecordsApiService
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import javax.inject.Named
+import javax.inject.Singleton
 
+@Module
+@InstallIn(SingletonComponent::class)
 object NetworkModule {
 
-    private const val BASE_URL = "http://10.0.2.2:3001/"
+    const val BASE_URL = "http://10.0.2.2:3001/"
 
-    /**
-     * Provides a Retrofit instance for authentication-related API calls without interceptors.
-     */
-    fun provideAuthRetrofit(): Retrofit {
+    @Provides
+    @Singleton
+    fun provideGson(): Gson = GsonBuilder().create()
+
+    @Provides
+    @Singleton
+    @Named("unauthRetrofit")
+    fun provideUnauthRetrofit(gson: Gson): Retrofit {
         return Retrofit.Builder()
             .baseUrl(BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create())
+            .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
     }
 
-    /**
-     * Provides a Retrofit instance for general API calls with TokenInterceptor and Logging.
-     */
-    fun provideAppRetrofit(context: Context, tokenInterceptor: TokenInterceptor): Retrofit {
-
-        val client = OkHttpClient.Builder()
+    @Provides
+    @Singleton
+    fun provideOkHttpClient(
+        tokenInterceptor: TokenInterceptor
+    ): OkHttpClient {
+        return OkHttpClient.Builder()
             .addInterceptor(tokenInterceptor)
             .build()
+    }
 
-        return Retrofit.Builder()
-            .baseUrl(BASE_URL)
-            .client(client)
-            .addConverterFactory(GsonConverterFactory.create())
+    @Provides
+    @Singleton
+    @Named("appRetrofit")
+    fun provideAppRetrofit(
+        @Named("unauthRetrofit") unauthRetrofit: Retrofit,
+        okHttpClient: OkHttpClient
+    ): Retrofit {
+        return unauthRetrofit.newBuilder()
+            .client(okHttpClient)
             .build()
+    }
+
+    @Provides
+    @Singleton
+    @Named("unsecureAuthApi")
+    fun provideUnsecureAuthApi(
+        @Named("unauthRetrofit") retrofit: Retrofit
+    ): AuthApiService {
+        return retrofit.create(AuthApiService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    @Named("authApi")
+    fun provideAuthApi(
+        @Named("appRetrofit") retrofit: Retrofit
+    ): AuthApiService {
+        return retrofit.create(AuthApiService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    @Named("recordsApi")
+    fun provideRecordsApi(
+        @Named("appRetrofit") retrofit: Retrofit
+    ): RecordsApiService {
+        return retrofit.create(RecordsApiService::class.java)
     }
 }
