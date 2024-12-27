@@ -2,24 +2,21 @@ package com.example.safesound.ui.auth
 
 import android.content.Intent
 import android.os.Bundle
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModelProvider
 import com.example.safesound.R
-import com.example.safesound.data.AuthRepository
 import com.example.safesound.ui.main.MainActivity
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class AuthenticationActivity : AppCompatActivity() {
 
-    private lateinit var authViewModel: AuthViewModel
+    private val authViewModel: AuthViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_authentication)
-
-        val authRepository = AuthRepository(this)
-        val authViewModelFactory = AuthViewModelFactory(authRepository)
-        authViewModel = ViewModelProvider(this, authViewModelFactory)[AuthViewModel::class.java]
 
         authViewModel.authState.observe(this) { isLoggedIn ->
             if (isLoggedIn) {

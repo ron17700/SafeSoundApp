@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import androidx.activity.viewModels
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.navigation.NavigationView
 import androidx.navigation.findNavController
@@ -13,35 +14,32 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModelProvider
 import com.example.safesound.R
-import com.example.safesound.data.AuthRepository
 import com.example.safesound.databinding.ActivityMainBinding
 import com.example.safesound.ui.auth.AuthViewModel
-import com.example.safesound.ui.auth.AuthViewModelFactory
 import com.example.safesound.ui.auth.AuthenticationActivity
+import com.example.safesound.ui.my_records.RecordCreationDialogFragment
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
 
-    private lateinit var authViewModel: AuthViewModel
+    private val authViewModel: AuthViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
-        val authViewModelFactory = AuthViewModelFactory(AuthRepository(this))
-        authViewModel = ViewModelProvider(this, authViewModelFactory).get(AuthViewModel::class.java)
         setContentView(binding.root)
 
         setSupportActionBar(binding.appBarMain.toolbar)
 
         binding.appBarMain.fab.setOnClickListener { view ->
-            Snackbar.make(view, "Create new record!", Snackbar.LENGTH_LONG)
-                .setAction("Action", null)
-                .setAnchorView(R.id.fab).show()
+            val dialog = RecordCreationDialogFragment()
+            dialog.show(supportFragmentManager, "RecordCreationDialog")
         }
         val drawerLayout: DrawerLayout = binding.drawerLayout
         val navView: NavigationView = binding.navView
