@@ -9,6 +9,8 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
+import com.example.safesound.R
 import com.example.safesound.databinding.FragmentRegisterBinding
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -54,14 +56,14 @@ class RegisterFragment : Fragment() {
         authViewModel.registerResult.observe(viewLifecycleOwner) { result ->
             if (result.success) {
                 Toast.makeText(requireContext(), "Registration successful! Please login.", Toast.LENGTH_SHORT).show()
-                parentFragmentManager.popBackStack()
+                findNavController().navigate(R.id.action_registerFragment_to_loginFragment)
             } else {
                 Toast.makeText(requireContext(), result.errorMessage ?: "Registration failed", Toast.LENGTH_SHORT).show()
             }
         }
 
         binding.returnToLoginButton.setOnClickListener {
-            parentFragmentManager.popBackStack()
+            findNavController().navigate(R.id.action_registerFragment_to_loginFragment)
         }
 
         return binding.root
