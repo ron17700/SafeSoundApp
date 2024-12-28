@@ -5,10 +5,9 @@
     <string name="nav_header_title">Android Studio</string>
     <string name="nav_header_subtitle">android.studio@android.com</string>
     <string name="nav_header_desc">Navigation header</string>
-    <string name="action_settings">Settings</string>
     <string name="action_logout">Logout</string>
 
     <string name="menu_my_records">My Records</string>
-    <string name="menu_shared_records">Shared With Me</string>
+    <string name="menu_shared_records">Public Records</string>
     <string name="menu_records_map">Records Map</string>
 </resources>

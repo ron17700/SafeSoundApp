@@ -18,7 +18,7 @@ import com.example.safesound.R
 import com.example.safesound.databinding.ActivityMainBinding
 import com.example.safesound.ui.auth.AuthViewModel
 import com.example.safesound.ui.auth.AuthenticationActivity
-import com.example.safesound.ui.my_records.RecordCreationDialogFragment
+import com.example.safesound.ui.records_list.RecordCreationDialogFragment
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -48,11 +48,21 @@ class MainActivity : AppCompatActivity() {
         // menu should be considered as top level destinations.
         appBarConfiguration = AppBarConfiguration(
             setOf(
-                R.id.nav_my_records, R.id.nav_shared_records, R.id.nav_records_map
+                R.id.nav_records_list, R.id.nav_shared_records, R.id.nav_records_map
             ), drawerLayout
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
+
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            val isTopLevelDestination = appBarConfiguration.topLevelDestinations.contains(destination.id)
+            if (isTopLevelDestination) {
+                binding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
+            } else {
+                binding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
+            }
+        }
+
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -68,12 +78,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
-            R.id.action_settings -> {
-                Snackbar.make(binding.root, "Settings clicked.", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null)
-                    .show()
-                true
-            }
             R.id.action_logout -> {
                 authViewModel.logoutResult.observe(this) { result ->
                     if (result.success) {

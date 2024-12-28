@@ -1,87 +1,121 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/layoutRecordCreation"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
     android:padding="24dp">
 
-    <!-- Record Name Input -->
-    <EditText
-        android:id="@+id/editTextRecordName"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Record Name"
-        android:inputType="textPersonName" />
-
-    <!-- Optional: Photo Selection Button -->
-    <Button
-        android:id="@+id/buttonUploadPhoto"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Upload Photo"
-        android:layout_marginTop="16dp" />
-
-    <!-- Image Preview -->
-    <ImageView
-        android:id="@+id/imageViewPreview"
-        android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:layout_gravity="center"
-        android:layout_marginTop="16dp"
-        android:scaleType="centerCrop"
-        android:visibility="gone"
-        android:src="@drawable/ic_menu_camera" />
-
-    <!-- Buttons (Start Recording and Cancel) -->
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:orientation="horizontal">
-
-        <Button
-            android:id="@+id/buttonCancel"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Cancel" />
-
-        <Button
-            android:id="@+id/buttonStartRecord"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginStart="8dp"
-            android:text="Record" />
-    </LinearLayout>
-
-    <!-- Recording UI (Initially Hidden) -->
-    <LinearLayout
-        android:id="@+id/layoutRecording"
+        android:id="@+id/layoutRecordCreation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:gravity="center"
-        android:visibility="gone"
-        android:layout_marginTop="24dp">
+        android:gravity="center_horizontal">
 
-        <!-- Circular Timer -->
+        <!-- Title -->
         <TextView
-            android:id="@+id/textViewRecordingTime"
+            android:id="@+id/textViewDialogTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Recording Time: 00:00"
-            android:textSize="24sp"
-            android:textStyle="bold" />
+            android:text="Create New Record"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="16dp"
+            android:textColor="@color/black" />
 
-        <!-- Finish Recording Button -->
-        <Button
-            android:id="@+id/buttonFinishRecording"
-            android:layout_width="wrap_content"
+        <!-- Record Name Input -->
+        <EditText
+            android:id="@+id/editTextRecordName"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Finish Recording"
-            android:layout_marginTop="16dp" />
+            android:hint="Enter Record Name"
+            android:inputType="textPersonName"
+            android:padding="12dp" />
+
+        <!-- Public Checkbox -->
+        <CheckBox
+            android:id="@+id/checkBoxPublic"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Make this record public"
+            android:layout_marginTop="16dp"
+            android:padding="8dp" />
+
+        <!-- Photo Upload Section -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:layout_marginTop="16dp">
+
+            <ImageButton
+                android:id="@+id/buttonUploadPhoto"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="Upload Photo"
+                android:src="@drawable/ic_image"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:layout_marginTop="16dp"
+                android:layout_gravity="center_horizontal" />
+
+            <ImageView
+                android:id="@+id/imageViewPreview"
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                android:layout_marginStart="16dp"
+                android:scaleType="centerCrop"
+                android:visibility="gone"
+                android:background="@android:color/darker_gray" />
+        </LinearLayout>
+
+        <!-- Buttons (Start Recording and Cancel) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/buttonCancel"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Cancel" />
+
+            <Button
+                android:id="@+id/buttonStartRecord"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:text="Record" />
+        </LinearLayout>
+
+        <!-- Recording UI (Initially Hidden) -->
+        <LinearLayout
+            android:id="@+id/layoutRecording"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:visibility="gone"
+            android:layout_marginTop="24dp">
+
+            <!-- Circular Timer -->
+            <TextView
+                android:id="@+id/textViewRecordingTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Recording Time: 00:00"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:textColor="@color/black" />
+
+            <!-- Finish Recording Button -->
+            <Button
+                android:id="@+id/buttonFinishRecording"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Finish Recording"
+                android:layout_marginTop="16dp" />
+        </LinearLayout>
     </LinearLayout>
-
-</LinearLayout>
+</ScrollView>
