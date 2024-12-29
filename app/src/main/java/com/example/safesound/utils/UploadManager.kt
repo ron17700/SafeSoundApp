@@ -1,8 +1,8 @@
 package com.example.safesound.utils
 
 import android.util.Log
-import com.example.safesound.data.my_records.RecordsApiService
-import com.example.safesound.utils.TimestampFormatter.formatTimestamp
+import com.example.safesound.data.records_list.RecordsApiService
+import com.example.safesound.utils.TimestampFormatter.convertTimestampToIsoFormat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -40,12 +40,11 @@ class UploadManager @Inject constructor(
             try {
                 val requestBody = RequestBody.create(MediaType.parse("audio/mpeg"), chunkFile)
                 val chunkPart = MultipartBody.Part.createFormData("file", chunkFile.name, requestBody)
-                val idRequestBody = RequestBody.create(MediaType.parse("text/plain"), recordId)
-                val startTimeRequestBody = RequestBody.create(MediaType.parse("text/plain"), formatTimestamp(startTime))
-                val endTimeRequestBody = RequestBody.create(MediaType.parse("text/plain"), formatTimestamp(endTime))
+                val startTimeRequestBody = RequestBody.create(MediaType.parse("text/plain"), convertTimestampToIsoFormat(startTime))
+                val endTimeRequestBody = RequestBody.create(MediaType.parse("text/plain"), convertTimestampToIsoFormat(endTime))
 
                 val response = recordsApi.uploadRecordChunk(
-                    recordId = idRequestBody,
+                    recordId = recordId,
                     chunkFile = chunkPart,
                     startTime = startTimeRequestBody,
                     endTime = endTimeRequestBody

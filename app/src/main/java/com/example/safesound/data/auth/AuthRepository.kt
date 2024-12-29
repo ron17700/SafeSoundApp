@@ -11,7 +11,7 @@ import javax.inject.Named
 import javax.inject.Singleton
 
 data class LoginRequest(val email: String, val password: String)
-data class RegisterRequest(val email: String, val password: String, val profileImage: Uri?)
+data class RegisterRequest(val userName: String, val email: String, val password: String, val profileImage: Uri?)
 data class RefreshTokenRequest(val refreshToken: String)
 data class AuthResponse(val accessToken: String?, val refreshToken: String?, val message: String?)
 
@@ -45,11 +45,11 @@ class AuthRepository @Inject constructor(
         }
     }
 
-    suspend fun register(email: String, password: String, profileImage: Uri?): Result<AuthResponse> {
+    suspend fun register(userName: String, email: String, password: String, profileImage: Uri?): Result<AuthResponse> {
         Log.d("AuthRepository", "Attempting to register with email: $email")
         return withContext(Dispatchers.IO) {
             try {
-                val response = authApi.register(RegisterRequest(email, password, profileImage))
+                val response = authApi.register(RegisterRequest(userName, email, password, profileImage))
                 Log.d("AuthRepository", "Registration successful")
                 Result(success = true)
             } catch (e: Exception) {

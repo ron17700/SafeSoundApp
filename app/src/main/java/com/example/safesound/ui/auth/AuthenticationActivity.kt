@@ -1,11 +1,10 @@
 package com.example.safesound.ui.auth
 
-import android.content.Intent
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.navigation.findNavController
 import com.example.safesound.R
-import com.example.safesound.ui.main.MainActivity
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -18,28 +17,15 @@ class AuthenticationActivity : AppCompatActivity() {
 
         setContentView(R.layout.activity_authentication)
 
+        val navController = findNavController(R.id.auth_nav_host_fragment)
+
         authViewModel.authState.observe(this) { isLoggedIn ->
             if (isLoggedIn) {
-                navigateToMainActivity()
-            } else {
-                showLoginPage()
+                navController.navigate(R.id.action_loginFragment_to_mainActivity)
             }
         }
 
         authViewModel.checkUserLoggedIn()
     }
-
-    private fun navigateToMainActivity() {
-        val intent = Intent(this, MainActivity::class.java)
-        startActivity(intent)
-        finish()
-    }
-
-    private fun showLoginPage() {
-        if (supportFragmentManager.findFragmentById(R.id.auth_container) !is LoginFragment) {
-            supportFragmentManager.beginTransaction()
-                .replace(R.id.auth_container, LoginFragment())
-                .commit()
-        }
-    }
 }
+

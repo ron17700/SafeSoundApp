@@ -1,67 +1,107 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="16dp">
+    android:layout_margin="8dp"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="4dp">
 
-    <!-- Icon representing the class -->
-    <ImageView
-        android:id="@+id/imageViewClassIcon"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_marginEnd="16dp"
-        android:contentDescription="Class Icon"
-        android:src="@drawable/ic_menu_camera"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent" />
-
-    <!-- Record Name and Date -->
-    <LinearLayout
-        android:id="@+id/linearLayoutRecordDetails"
-        android:layout_width="0dp"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintStart_toEndOf="@id/imageViewClassIcon"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/imageViewRecordPhoto"
-        android:layout_marginEnd="16dp">
+        android:padding="16dp">
 
-        <TextView
-            android:id="@+id/textViewRecordName"
-            android:layout_width="wrap_content"
+        <!-- Icon representing the class -->
+        <ImageView
+            android:id="@+id/imageViewClassIcon"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:contentDescription="Class Icon"
+            android:src="@drawable/ic_natural"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/spacerView" />
+
+        <!-- Spacer View for controlled gap -->
+        <View
+            android:id="@+id/spacerView"
+            android:layout_width="16dp"
+            android:layout_height="0dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@id/imageViewClassIcon"
+            app:layout_constraintEnd_toStartOf="@id/linearLayoutRecordDetails" />
+
+        <!-- Record Name and Date -->
+        <LinearLayout
+            android:id="@+id/linearLayoutRecordDetails"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Record Name"
-            android:textAppearance="?attr/textAppearanceSubtitle1"
-            android:textColor="@color/black"
-            android:lineSpacingExtra="8dp" />
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/imageViewRecordPhoto"
+            app:layout_constraintStart_toEndOf="@id/spacerView"
+            app:layout_constraintTop_toTopOf="parent">
 
-        <TextView
-            android:id="@+id/textViewCreatedDate"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Created Date"
-            android:textAppearance="?attr/textAppearanceCaption"
-            android:textColor="@android:color/darker_gray"
-            android:layout_marginTop="4dp" />
+            <TextView
+                android:id="@+id/textViewRecordName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:lineSpacingExtra="8dp"
+                android:text="Record Name"
+                android:textAppearance="?attr/textAppearanceSubtitle1"
+                android:textColor="@color/black"
+                android:textStyle="bold" />
 
+            <TextView
+                android:id="@+id/textViewCreatedDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Created Date"
+                android:textAppearance="?attr/textAppearanceCaption"
+                android:textColor="@android:color/darker_gray" />
+        </LinearLayout>
 
-    </LinearLayout>
+        <!-- Record Photo -->
+        <ImageView
+            android:id="@+id/imageViewRecordPhoto"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_marginStart="4dp"
+            android:contentDescription="Record Photo"
+            android:scaleType="centerCrop"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toEndOf="@id/linearLayoutRecordDetails"
+            app:layout_constraintEnd_toStartOf="@id/spacerView2" />
 
-    <!-- Record Photo -->
-    <ImageView
-        android:id="@+id/imageViewRecordPhoto"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:contentDescription="Record Photo"
-        android:scaleType="centerCrop"
-        android:src="@drawable/ic_menu_camera"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent" />
+        <!-- Spacer View for controlled gap -->
+        <View
+            android:id="@+id/spacerView2"
+            android:layout_width="4dp"
+            android:layout_height="0dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@id/imageViewRecordPhoto"
+            app:layout_constraintEnd_toStartOf="@id/dropdown_menu" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <!-- Edit/Delete menu (Dropdown) -->
+        <ImageButton
+            android:id="@+id/dropdown_menu"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="4dp"
+            android:src="@drawable/ic_more_vert"
+            android:contentDescription="Options"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.cardview.widget.CardView>

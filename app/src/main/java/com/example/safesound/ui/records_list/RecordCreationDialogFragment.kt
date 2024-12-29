@@ -1,4 +1,4 @@
-package com.example.safesound.ui.my_records
+package com.example.safesound.ui.records_list
 
 import android.Manifest
 import android.app.Activity
@@ -23,6 +23,7 @@ import com.squareup.picasso.Picasso
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -43,22 +44,32 @@ class RecordCreationDialogFragment : DialogFragment() {
 
     private lateinit var pickImageLauncher: ActivityResultLauncher<Intent>
 
-    private val myRecordsViewModel: MyRecordsViewModel by viewModels()
+    private val recordsViewModel: RecordsViewModel by viewModels()
 
 
     private var recordId: String? = null
     private var selectedImageFile: File? = null
     private var elapsedTime = 0L
     private var elapsedTimer: CountDownTimer? = null
+    private var recordingJob: Job? = null
 
     companion object {
-        private const val PICK_IMAGE_REQUEST = 1
         private const val PERMISSION_REQUEST_CODE = 1001
-        private const val CHUNK_INTERVAL_MS = 10 * 60 * 1000L // 10 minutes
+//        private const val CHUNK_INTERVAL_MS = 10 * 60 * 1000L // 10 minutes
+        private const val CHUNK_INTERVAL_MS = 10 * 1000L // 10 minutes
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val dialog = super.onCreateDialog(savedInstanceState)
+        dialog.setOnShowListener {
+            val window = dialog.window
+            if (window != null) {
+                val layoutParams = window.attributes
+                layoutParams.width = (resources.displayMetrics.widthPixels * 0.9).toInt()
+                layoutParams.height = WindowManager.LayoutParams.WRAP_CONTENT
+                window.attributes = layoutParams
+            }
+        }
         // Prevent dismissing by tapping outside
         dialog.setCanceledOnTouchOutside(false)
         // Prevent dismissing with back button
@@ -110,7 +121,7 @@ class RecordCreationDialogFragment : DialogFragment() {
     }
 
     private fun observeViewModel() {
-        myRecordsViewModel.createRecordResult.observe(viewLifecycleOwner) { result ->
+        recordsViewModel.createRecordResult.observe(viewLifecycleOwner) { result ->
             if (result.success) {
                 recordId = result.data?._id
                 startRecording()
@@ -127,7 +138,8 @@ class RecordCreationDialogFragment : DialogFragment() {
             binding.editTextRecordName.error = "Record name is required"
             return
         }
-        myRecordsViewModel.createRecord(recordName, selectedImageFile)
+        val isPublic = binding.checkBoxPublic.isChecked;
+        recordsViewModel.createRecord(recordName, isPublic, selectedImageFile)
     }
 
     private fun startRecording() {
@@ -140,6 +152,7 @@ class RecordCreationDialogFragment : DialogFragment() {
     }
 
     private fun stopRecording() {
+        recordingJob?.cancel()
         cancelTimers()
         val finalChunkFile = audioRecorder.stop()
         val currentTimeMillis = System.currentTimeMillis()
@@ -176,7 +189,7 @@ class RecordCreationDialogFragment : DialogFragment() {
     }
 
     private fun scheduleChunkUploads() {
-        val job = CoroutineScope(Dispatchers.IO).launch {
+        recordingJob = CoroutineScope(Dispatchers.IO).launch {
             var startTime = System.currentTimeMillis() - elapsedTime
 
             while (isActive) {
@@ -214,7 +227,7 @@ class RecordCreationDialogFragment : DialogFragment() {
             }
         }
 
-        job.invokeOnCompletion { throwable ->
+        recordingJob?.invokeOnCompletion { throwable ->
             if (throwable != null) {
                 Log.e("RecordDialog", "Coroutine cancelled due to error: ${throwable.message}")
                 dismissSafely()
@@ -234,6 +247,7 @@ class RecordCreationDialogFragment : DialogFragment() {
         binding.buttonCancel.visibility = View.GONE
         binding.buttonUploadPhoto.visibility = View.GONE
         binding.imageViewPreview.visibility = View.GONE
+        binding.checkBoxPublic.visibility = View.GONE
     }
 
     private fun initializeImagePicker() {
@@ -247,6 +261,7 @@ class RecordCreationDialogFragment : DialogFragment() {
                         .centerCrop()
                         .into(binding.imageViewPreview)
                     binding.imageViewPreview.visibility = View.VISIBLE
+                    binding.buttonUploadPhoto.visibility = View.GONE
                 }
             }
         }

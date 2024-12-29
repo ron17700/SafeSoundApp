@@ -1,0 +1,93 @@
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph_main"
+    app:startDestination="@id/nav_records_list">
+
+    <!-- My Records -->
+    <fragment
+        android:id="@+id/nav_records_list"
+        android:name="com.example.safesound.ui.records_list.RecordsListFragment"
+        tools:layout="@layout/fragment_records_list">
+        <argument
+            android:name="isMyRecords"
+            app:argType="boolean"
+            android:defaultValue="true" />
+        <action
+            android:id="@+id/action_recordsListFragment_to_recordChunksFragment"
+            app:destination="@id/recordChunksFragment">
+            <argument
+                android:name="recordId"
+                app:argType="string" />
+            <argument
+                android:name="isMyRecords"
+                app:argType="boolean" />
+        </action>
+    </fragment>
+
+    <!-- Record Chunks -->
+    <fragment
+        android:id="@+id/recordChunksFragment"
+        android:name="com.example.safesound.ui.records_list.RecordChunksFragment"
+        tools:layout="@layout/fragment_record_chunks">
+        <argument
+            android:name="recordId"
+            app:argType="string" />
+        <argument
+            android:name="isMyRecords"
+            app:argType="boolean" />
+        <action
+            android:id="@+id/action_recordChunksFragment_to_chunkDetailFragment"
+            app:destination="@id/chunkDetailFragment">
+            <argument
+                android:name="chunkId"
+                app:argType="string" />
+            <argument
+                android:name="chunkName"
+                app:argType="string" />
+            <argument
+                android:name="audioFilePath"
+                app:argType="string" />
+            <argument
+                android:name="summary"
+                app:argType="string" />
+            <argument
+                android:name="isMyRecords"
+                app:argType="boolean" />
+        </action>
+    </fragment>
+
+    <!-- Chunk Detail -->
+    <fragment
+        android:id="@+id/chunkDetailFragment"
+        android:name="com.example.safesound.ui.records_list.ChunkDetailFragment"
+        tools:layout="@layout/fragment_chunk_detail">
+    </fragment>
+
+    <!-- Shared Records -->
+    <fragment
+        android:id="@+id/nav_shared_records"
+        android:name="com.example.safesound.ui.records_list.RecordsListFragment"
+        tools:layout="@layout/fragment_records_list">
+        <argument
+            android:name="isMyRecords"
+            app:argType="boolean"
+            android:defaultValue="false" />
+        <action
+            android:id="@+id/action_recordsListFragment_to_recordChunksFragment"
+            app:destination="@id/recordChunksFragment">
+            <argument
+                android:name="recordId"
+                app:argType="string" />
+            <argument
+                android:name="isMyRecords"
+                app:argType="boolean" />
+        </action>
+    </fragment>
+
+    <!-- Records Map -->
+    <fragment
+        android:id="@+id/nav_records_map"
+        android:name="com.example.safesound.ui.records_map.RecordsMapFragment"
+        tools:layout="@layout/fragment_records_map" />
+</navigation>

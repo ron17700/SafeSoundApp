@@ -45,13 +45,13 @@ class AudioRecorder @Inject constructor() {
             return null
         }
 
-        val stoppedFile = stop() // Stop current recording
-        return if (stoppedFile != null) {
-            startNewRecording(context) // Start new chunk recording
+        val stoppedFile = stop()
+        if (stoppedFile != null) {
+            startNewRecording(context)
         } else {
             Log.e("AudioRecorder", "Failed to create chunk. Stop returned null.")
-            null
         }
+        return stoppedFile
     }
 
     private fun startNewRecording(context: Context): File? {

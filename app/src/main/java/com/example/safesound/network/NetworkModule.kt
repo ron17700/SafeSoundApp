@@ -1,7 +1,7 @@
 package com.example.safesound.network
 
 import com.example.safesound.data.auth.AuthApiService
-import com.example.safesound.data.my_records.RecordsApiService
+import com.example.safesound.data.records_list.RecordsApiService
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import dagger.Module
