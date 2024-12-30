@@ -10,4 +10,5 @@
     <string name="menu_my_records">My Records</string>
     <string name="menu_shared_records">Public Records</string>
     <string name="menu_records_map">Records Map</string>
+    <string name="menu_user_profile">My Profile</string>
 </resources>
