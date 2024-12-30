@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import com.example.safesound.data.auth.TokenManager
 import com.example.safesound.ui.auth.AuthenticationActivity
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -31,7 +30,7 @@ class TokenInterceptor @Inject constructor(
             return chain.proceed(request)
         }
         var accessToken = tokenManager.getAccessToken()
-        if (accessToken == null || tokenManager.isTokenExpired(accessToken)) {
+        if (tokenManager.isTokenExpired()) {
             val refreshSuccessful = tokenManager.refreshToken()
             if (refreshSuccessful) {
                 accessToken = tokenManager.getAccessToken()

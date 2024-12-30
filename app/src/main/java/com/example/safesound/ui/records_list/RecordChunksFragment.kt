@@ -9,7 +9,7 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.safesound.adapters.ChunksAdapter
-import com.example.safesound.data.records_list.Chunk
+import com.example.safesound.data.records.Chunk
 import com.example.safesound.databinding.FragmentRecordChunksBinding
 import dagger.hilt.android.AndroidEntryPoint
 

@@ -11,7 +11,7 @@ import android.view.ViewGroup
 import android.widget.SeekBar
 import androidx.fragment.app.Fragment
 import com.example.safesound.R
-import com.example.safesound.data.records_list.Chunk
+import com.example.safesound.data.records.Chunk
 import com.example.safesound.databinding.FragmentChunkDetailBinding
 import com.example.safesound.network.NetworkModule.BASE_URL
 import dagger.hilt.android.AndroidEntryPoint

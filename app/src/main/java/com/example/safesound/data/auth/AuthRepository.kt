@@ -1,22 +1,27 @@
 package com.example.safesound.data.auth
 
+import android.content.Context
 import android.net.Uri
 import android.util.Log
 import com.example.safesound.utils.ErrorParser
+import com.example.safesound.utils.RequestHelper
+import com.example.safesound.utils.RequestHelper.toRequestBody
 import com.example.safesound.utils.Result
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import okhttp3.MultipartBody
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
 
 data class LoginRequest(val email: String, val password: String)
-data class RegisterRequest(val userName: String, val email: String, val password: String, val profileImage: Uri?)
 data class RefreshTokenRequest(val refreshToken: String)
 data class AuthResponse(val accessToken: String?, val refreshToken: String?, val message: String?)
 
 @Singleton
 class AuthRepository @Inject constructor(
+    @ApplicationContext private val context: Context,
     @Named("unsecureAuthApi") private val unsecureAuthApi: AuthApiService,
     @Named("authApi") private val authApi: AuthApiService,
     private val tokenManager: TokenManager
@@ -30,6 +35,9 @@ class AuthRepository @Inject constructor(
         return withContext(Dispatchers.IO) {
             try {
                 val response = unsecureAuthApi.login(LoginRequest(email, password))
+                if (!response.isSuccessful) {
+                    throw IllegalStateException(response.errorBody()?.string())
+                }
                 response.body()?.accessToken?.let {
                     response.body()?.refreshToken?.let { refreshToken ->
                         tokenManager.saveTokens(it, refreshToken)
@@ -49,7 +57,16 @@ class AuthRepository @Inject constructor(
         Log.d("AuthRepository", "Attempting to register with email: $email")
         return withContext(Dispatchers.IO) {
             try {
-                val response = authApi.register(RegisterRequest(userName, email, password, profileImage))
+                var imagePart: MultipartBody.Part? = null;
+                if (profileImage != null) {
+                    imagePart = RequestHelper.imageUriToMultiPart(context, profileImage, "profile_image")
+                }
+                val response = authApi.register(
+                    userName.toRequestBody(), email.toRequestBody(), password.toRequestBody(), imagePart
+                )
+                if (!response.isSuccessful) {
+                    throw IllegalStateException(response.errorBody()?.string())
+                }
                 Log.d("AuthRepository", "Registration successful")
                 Result(success = true)
             } catch (e: Exception) {
@@ -64,7 +81,10 @@ class AuthRepository @Inject constructor(
         Log.d("AuthRepository", "Attempting to log out")
         return withContext(Dispatchers.IO) {
             try {
-                authApi.logout()
+                val response = authApi.logout()
+                if (!response.isSuccessful) {
+                    throw IllegalStateException(response.errorBody()?.string())
+                }
                 tokenManager.clearTokens()
                 Log.d("AuthRepository", "Logout successful and tokens cleared")
                     Result(success = true)

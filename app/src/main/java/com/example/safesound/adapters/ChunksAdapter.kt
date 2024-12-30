@@ -6,7 +6,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.safesound.R
-import com.example.safesound.data.records_list.Chunk
+import com.example.safesound.data.records.Chunk
 import com.example.safesound.databinding.ItemChunkBinding
 import com.example.safesound.utils.TimestampFormatter.formatIsoToTime
 

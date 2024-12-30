@@ -1,7 +1,8 @@
 package com.example.safesound.network
 
 import com.example.safesound.data.auth.AuthApiService
-import com.example.safesound.data.records_list.RecordsApiService
+import com.example.safesound.data.records.RecordsApiService
+import com.example.safesound.data.user.UsersApiService
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import dagger.Module
@@ -81,5 +82,14 @@ object NetworkModule {
         @Named("appRetrofit") retrofit: Retrofit
     ): RecordsApiService {
         return retrofit.create(RecordsApiService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    @Named("usersApi")
+    fun provideUsersApi(
+        @Named("appRetrofit") retrofit: Retrofit
+    ): UsersApiService {
+        return retrofit.create(UsersApiService::class.java)
     }
 }
