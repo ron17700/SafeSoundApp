@@ -70,6 +70,13 @@ class MainActivity : AppCompatActivity() {
             } else {
                 binding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
             }
+            val shouldShowAddRecordButton = destination.id == R.id.nav_records_list
+            if (!shouldShowAddRecordButton) {
+                binding.appBarMain.fab.visibility = View.GONE
+            }
+            else {
+                binding.appBarMain.fab.visibility = View.VISIBLE
+            }
         }
         usersViewModel.getCurrentUser()
         observeViewModel()

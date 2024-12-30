@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import android.util.Log
 import com.example.safesound.data.auth.TokenManager
+import com.example.safesound.data.user.User
 import kotlinx.coroutines.withContext
 import com.example.safesound.utils.ErrorParser
 import com.example.safesound.utils.RequestHelper
@@ -25,6 +26,9 @@ data class Record(
     var recordClass: String,
     val public: Boolean,
     val isFavorite: Boolean,
+    val userId: User?,
+    val latitude: Double?,
+    val longitude: Double?,
     val image: String?
 )
 
@@ -43,7 +47,7 @@ class RecordsRepository @Inject constructor(
     @ApplicationContext private val context: Context,
     @Named("recordsApi") private val recordsApi: RecordsApiService
 ) {
-    suspend fun createRecord(name: String, isPublic: Boolean, imageUri: Uri?): Result<Record> {
+    suspend fun createRecord(name: String, isPublic: Boolean, latitude: Double?, longitude: Double?, imageUri: Uri?): Result<Record> {
         return withContext(Dispatchers.IO) {
             try {
                 var imagePart: MultipartBody.Part? = null;
@@ -152,7 +156,6 @@ class RecordsRepository @Inject constructor(
                 } else {
                     recordsApi.getAllPublicRecords()
                 }
-
                 if (!response.isSuccessful) {
                     throw IllegalStateException(response.errorBody()?.string())
                 }

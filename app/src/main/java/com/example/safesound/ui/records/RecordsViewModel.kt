@@ -34,9 +34,9 @@ class RecordsViewModel @Inject constructor(
     private val _likeRecordsResult = MutableLiveData<Result<Okio>>()
     val likeRecordsResult: LiveData<Result<Okio>> get() = _likeRecordsResult
 
-    fun createRecord(name: String, isPublic: Boolean, imageFile: Uri?) {
+    fun createRecord(name: String, isPublic: Boolean, latitude: Double?, longitude: Double?, imageFile: Uri?) {
         viewModelScope.launch {
-            val result = recordsRepository.createRecord(name, isPublic, imageFile)
+            val result = recordsRepository.createRecord(name, isPublic, latitude, longitude, imageFile)
             _createRecordResult.postValue(result)
         }
     }

@@ -1,6 +1,8 @@
 package com.example.safesound.ui.records
 
-import android.Manifest
+import android.Manifest.permission.ACCESS_COARSE_LOCATION
+import android.Manifest.permission.ACCESS_FINE_LOCATION
+import android.Manifest.permission.RECORD_AUDIO
 import android.app.Dialog
 import android.content.DialogInterface
 import android.net.Uri
@@ -38,6 +40,7 @@ class RecordCreationDialogFragment : DialogFragment() {
 
     @Inject
     lateinit var audioRecorder: AudioRecorder
+
     @Inject
     lateinit var uploadManager: UploadManager
 
@@ -72,18 +75,31 @@ class RecordCreationDialogFragment : DialogFragment() {
                 }
             }
         }
-        private const val PERMISSION_REQUEST_CODE = 1001
+
         private const val CHUNK_INTERVAL_MS = 10 * 60 * 1000L // 10 minutes
     }
 
-    private val imagePickerLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        if (uri != null) {
-            selectedImageUri = uri
-            Picasso.get()
-                .load(uri)
-                .fit()
-                .centerCrop()
-                .into(binding.buttonUploadPhoto)
+    private val imagePickerLauncher =
+        registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+            if (uri != null) {
+                selectedImageUri = uri
+                Picasso.get()
+                    .load(uri)
+                    .fit()
+                    .centerCrop()
+                    .into(binding.buttonUploadPhoto)
+            }
+        }
+
+    private val requestPermissionsLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+        val audioGranted = permissions[RECORD_AUDIO] == true
+        if (audioGranted) {
+            setupUI()
+            observeViewModel()
+        } else {
+            Toast.makeText(requireContext(), "Mandatory permissions not granted.", Toast.LENGTH_SHORT).show()
+            dismissSafely()
         }
     }
 
@@ -125,27 +141,13 @@ class RecordCreationDialogFragment : DialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setupPermissions()
-        setupUI()
-        observeViewModel()
+        requestPermissions()
     }
 
-    private fun setupPermissions() {
-        if (!PermissionUtils.hasPermissions(
-                requireContext(),
-                Manifest.permission.RECORD_AUDIO,
-                Manifest.permission.READ_EXTERNAL_STORAGE
-            )
-        ) {
-            PermissionUtils.requestPermissions(
-                requireActivity(),
-                arrayOf(
-                    Manifest.permission.RECORD_AUDIO,
-                    Manifest.permission.READ_EXTERNAL_STORAGE
-                ),
-                PERMISSION_REQUEST_CODE
-            )
-        }
+    private fun requestPermissions() {
+        val requiredPermissions = mutableListOf<String>()
+        requiredPermissions.addAll(arrayOf(RECORD_AUDIO, ACCESS_FINE_LOCATION, ACCESS_COARSE_LOCATION))
+        requestPermissionsLauncher.launch(requiredPermissions.toTypedArray())
     }
 
     private fun setupUI() {
@@ -214,7 +216,13 @@ class RecordCreationDialogFragment : DialogFragment() {
             return
         }
         isPublic = binding.checkBoxPublic.isChecked;
-        recordsViewModel.createRecord(recordName, isPublic, selectedImageUri)
+        val location = if (PermissionUtils.hasLocationPermissions(requireContext())) {
+            PermissionUtils.getLastKnownLocation(requireContext())
+        } else null
+        val latitude = location?.latitude
+        val longitude = location?.longitude
+        recordsViewModel.createRecord(recordName, isPublic, latitude, longitude, selectedImageUri)
+
     }
 
     private fun startRecording() {
@@ -339,13 +347,19 @@ class RecordCreationDialogFragment : DialogFragment() {
         endTime: Long,
         onCompletion: ((Boolean) -> Unit)? = null
     ) {
-        uploadManager.uploadChunk(recordId, chunkFile, startTime, endTime) { success, errorMessage ->
+        uploadManager.uploadChunk(
+            recordId,
+            chunkFile,
+            startTime,
+            endTime
+        ) { success, errorMessage ->
             if (success) {
                 Log.d("RecordDialog", "Chunk uploaded successfully.")
                 onCompletion?.invoke(true)
             } else {
                 Log.e("RecordDialog", "Failed to upload chunk: $errorMessage")
-                Toast.makeText(requireContext(), "Upload failed: $errorMessage", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Upload failed: $errorMessage", Toast.LENGTH_SHORT)
+                    .show()
                 onCompletion?.invoke(false)
             }
         }

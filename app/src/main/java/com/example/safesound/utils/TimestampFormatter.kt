@@ -12,10 +12,15 @@ object TimestampFormatter {
         return isoFormat.format(date)
     }
 
-    fun formatIsoToTime(isoString: String): String {
+    fun formatIsoToTime(isoString: String, includeDayMonthYear: Boolean = false): String {
         return try {
-            val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
-            val outputFormat = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
+            val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX", Locale.getDefault())
+            val outputFormat: SimpleDateFormat
+            outputFormat = if (includeDayMonthYear) {
+                SimpleDateFormat("MMM dd, yyyy - HH:mm", Locale.getDefault())
+            } else {
+                SimpleDateFormat("HH:mm:ss", Locale.getDefault())
+            }
             val date = inputFormat.parse(isoString)
             outputFormat.format(date ?: isoString)
         } catch (e: Exception) {
