@@ -1,4 +1,4 @@
-package com.example.safesound.ui.records_list
+package com.example.safesound.ui.records
 
 import android.app.AlertDialog
 import android.net.Uri
@@ -63,6 +63,7 @@ class RecordsListFragment : Fragment() {
                     }
                     .show()
             },
+            onStarClick = { record -> recordsViewModel.likeRecord(record._id)}
         )
         recordsAdapter.setIsMyRecords(isMyRecords)
         binding.recyclerViewRecords.apply {
@@ -90,6 +91,13 @@ class RecordsListFragment : Fragment() {
                 Toast.makeText(requireContext(), "Failed to delete record", Toast.LENGTH_SHORT).show()
             }
             recordsViewModel.clearDeleteRecordResult()
+        }
+
+        recordsViewModel.likeRecordsResult.observe(viewLifecycleOwner) { result ->
+            if (result == null) return@observe
+            if (result.success) {
+                recordsViewModel.fetchAllRecords(isMyRecords)
+            }
         }
     }
 

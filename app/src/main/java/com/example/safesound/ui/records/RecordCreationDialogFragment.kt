@@ -1,4 +1,4 @@
-package com.example.safesound.ui.records_list
+package com.example.safesound.ui.records
 
 import android.Manifest
 import android.app.Dialog

@@ -1,4 +1,4 @@
-package com.example.safesound.ui.records_list
+package com.example.safesound.ui.records
 
 import android.net.Uri
 import androidx.lifecycle.*
@@ -31,6 +31,9 @@ class RecordsViewModel @Inject constructor(
     private val _allRecordsResult = MutableLiveData<Result<List<Record>>>()
     val allRecordsResult: LiveData<Result<List<Record>>> get() = _allRecordsResult
 
+    private val _likeRecordsResult = MutableLiveData<Result<Okio>>()
+    val likeRecordsResult: LiveData<Result<Okio>> get() = _likeRecordsResult
+
     fun createRecord(name: String, isPublic: Boolean, imageFile: Uri?) {
         viewModelScope.launch {
             val result = recordsRepository.createRecord(name, isPublic, imageFile)
@@ -52,6 +55,13 @@ class RecordsViewModel @Inject constructor(
         }
     }
 
+    fun likeRecord(recordId: String) {
+        viewModelScope.launch {
+            val result = recordsRepository.likeRecord(recordId)
+            _likeRecordsResult.postValue(result)
+        }
+    }
+
     fun fetchAllChunks(recordId: String) {
         viewModelScope.launch {
             val result = recordsRepository.getAllChunks(recordId)
@@ -61,7 +71,7 @@ class RecordsViewModel @Inject constructor(
 
     fun fetchAllRecords(isMyRecords: Boolean) {
         viewModelScope.launch {
-            val result = recordsRepository.getAllRecords()
+            val result = recordsRepository.getAllRecords(isMyRecords)
             _allRecordsResult.postValue(result)
         }
     }

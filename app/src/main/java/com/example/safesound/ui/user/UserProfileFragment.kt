@@ -12,7 +12,6 @@ import androidx.fragment.app.activityViewModels
 import com.example.safesound.R
 import com.example.safesound.databinding.FragmentUserProfileBinding
 import com.example.safesound.network.NetworkModule
-import com.example.safesound.ui.main.UsersViewModel
 import com.squareup.picasso.Picasso
 import dagger.hilt.android.AndroidEntryPoint
 

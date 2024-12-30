@@ -1,4 +1,4 @@
-package com.example.safesound.ui.main;
+package com.example.safesound.ui.user;
 
 import android.net.Uri
 import androidx.lifecycle.*
