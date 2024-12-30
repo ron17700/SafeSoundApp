@@ -6,6 +6,7 @@ import android.util.Base64
 import android.util.Log
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
+import com.example.safesound.data.user.User
 import dagger.hilt.android.qualifiers.ApplicationContext
 import org.json.JSONObject
 import retrofit2.Call
@@ -62,23 +63,24 @@ class TokenManager @Inject constructor(
         Log.d("TokenManager", "Tokens cleared successfully")
     }
 
-    fun isTokenExpired(token: String): Boolean {
-        return try {
-            val parts = token.split(".")
-            if (parts.size != 3) return true
-            val payload = String(Base64.decode(parts[1], Base64.URL_SAFE))
-            val json = JSONObject(payload)
-            val exp = json.optLong("exp", 0) - 60 // Buffer of 60 seconds
-            System.currentTimeMillis() / 1000 >= exp
-        } catch (e: Exception) {
-            Log.e("TokenManager", "Error parsing token expiration", e)
-            true
-        }
+    fun isTokenExpired(): Boolean {
+        val json = getTokenJson()
+        val exp = json.optLong("exp", 0) - 60 // Buffer of 60 seconds
+        return System.currentTimeMillis() / 1000 >= exp
     }
 
     fun isUserLoggedIn(): Boolean {
-        val accessToken = getAccessToken()
-        return accessToken != null && !isTokenExpired(accessToken)
+        return !isTokenExpired()
+    }
+
+    fun getUser(): User {
+        val json = getTokenJson()
+        return User(_id = json.optString("userId", ""),
+            userName = json.optString("userName", ""),
+            email = json.optString("email", ""),
+            role = json.optString("role", ""),
+            profileImage = json.optString("profileImage", ""))
+
     }
 
     /**
@@ -108,5 +110,13 @@ class TokenManager @Inject constructor(
             Log.e("TokenManager", "Exception during token refresh", e)
             false
         }
+    }
+
+    private fun getTokenJson(): JSONObject {
+        val accessToken = getAccessToken() ?: ""
+        val parts = accessToken.split(".")
+        if (parts.size != 3) return JSONObject()
+        val payload = String(Base64.decode(parts[1], Base64.URL_SAFE))
+        return JSONObject(payload)
     }
 }

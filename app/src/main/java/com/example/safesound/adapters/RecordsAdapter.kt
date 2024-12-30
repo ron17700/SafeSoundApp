@@ -7,11 +7,10 @@ import android.widget.PopupMenu
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import androidx.transition.Visibility
 import com.example.safesound.R
 import com.example.safesound.databinding.ItemRecordBinding
 import com.squareup.picasso.Picasso
-import com.example.safesound.data.records_list.Record
+import com.example.safesound.data.records.Record
 import com.example.safesound.network.NetworkModule
 import java.text.SimpleDateFormat
 import java.util.Locale

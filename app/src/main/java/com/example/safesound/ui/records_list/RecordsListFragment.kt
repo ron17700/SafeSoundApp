@@ -1,18 +1,19 @@
 package com.example.safesound.ui.records_list
 
 import android.app.AlertDialog
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.safesound.adapters.RecordsAdapter
 import com.example.safesound.databinding.FragmentRecordsListBinding
+import com.example.safesound.data.records.Record
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -48,7 +49,7 @@ class RecordsListFragment : Fragment() {
             onRecordClick = { record, isMyRecords ->
                 navigateToRecordChunks(record._id, isMyRecords)
             },
-            onEditClick = { record -> },
+            onEditClick = { record -> showEditRecordDialog(record)},
             onDeleteClick = { record ->
                 AlertDialog.Builder(requireContext())
                     .setTitle("Confirm Delete")
@@ -81,12 +82,14 @@ class RecordsListFragment : Fragment() {
         }
 
         recordsViewModel.deleteRecordResult.observe(viewLifecycleOwner) { result ->
+            if (result == null) return@observe
             if (result.success) {
                 Toast.makeText(requireContext(), "Record deleted", Toast.LENGTH_SHORT).show()
                 recordsViewModel.fetchAllRecords(isMyRecords)
             } else {
                 Toast.makeText(requireContext(), "Failed to delete record", Toast.LENGTH_SHORT).show()
             }
+            recordsViewModel.clearDeleteRecordResult()
         }
     }
 
@@ -109,6 +112,17 @@ class RecordsListFragment : Fragment() {
         requireActivity().supportFragmentManager.setFragmentResultListener("refreshRecords", this) { _, _ ->
             recordsViewModel.fetchAllRecords(isMyRecords)
         }
+    }
+
+    private fun showEditRecordDialog(record: Record) {
+        val dialog = RecordCreationDialogFragment.newInstance(
+            isEditMode = true,
+            recordId = record._id,
+            recordName = record.name,
+            isPublic = record.public,
+            imageUri = Uri.parse(record.image)
+        )
+        dialog.show(parentFragmentManager, "EditRecordDialog")
     }
 
     override fun onDestroyView() {

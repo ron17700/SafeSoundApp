@@ -1,40 +1,63 @@
-package com.example.safesound.data.records_list
+package com.example.safesound.data.records
 
+import android.content.Context
+import android.net.Uri
 import android.util.Log
 import kotlinx.coroutines.withContext
 import com.example.safesound.utils.ErrorParser
+import com.example.safesound.utils.RequestHelper
+import com.example.safesound.utils.RequestHelper.toRequestBody
 import com.example.safesound.utils.Result
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
-import okhttp3.MediaType
 import okhttp3.MultipartBody
-import okhttp3.RequestBody
 import okio.Okio
-import java.io.File
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
 
-
-data class CreateRecordRequest(val name: String, val isPublic: Boolean, val image: String?)
-data class CreateRecordResponse(val _id: String)
-data class UploadChunkResponse(val chunkId: String)
-data class Record(val _id: String, val name: String, val createdAt: String, var recordClass: String, val image: String?)
+data class Record(val _id: String, val name: String, val createdAt: String, var recordClass: String, val public: Boolean, val image: String?)
 data class Chunk(val _id: String, val name: String, val startTime: String, val endTime: String, var chunkClass: String, val summary: String, val audioFilePath: String)
 
 @Singleton
 class RecordsRepository @Inject constructor(
+    @ApplicationContext private val context: Context,
     @Named("recordsApi") private val recordsApi: RecordsApiService
 ) {
-    suspend fun createRecord(name: String, isPublic: Boolean, imageFile: File?): Result<CreateRecordResponse> {
+    suspend fun createRecord(name: String, isPublic: Boolean, imageUri: Uri?): Result<Record> {
         return withContext(Dispatchers.IO) {
             try {
-                val imagePart = imageFile?.let {
-                    val requestBody = RequestBody.create(MediaType.parse("image/*"), imageFile)
-                    MultipartBody.Part.createFormData("file", it.name, requestBody)
+                var imagePart: MultipartBody.Part? = null;
+                if (imageUri != null) {
+                    imagePart = RequestHelper.imageUriToMultiPart(context, imageUri, "record_image")
                 }
-                val nameRequestBody = RequestBody.create(MediaType.parse("text/plain"), name)
-                val response = recordsApi.createRecord(nameRequestBody, isPublic, imagePart)
+                val response = recordsApi.createRecord(name.toRequestBody(), isPublic, imagePart)
+                if (!response.isSuccessful) {
+                    throw IllegalStateException(response.errorBody()?.string())
+                }
                 Log.d("RecordsRepository", "Record created: ${response.body()?._id}")
+                Result(success = true, data = response.body())
+            } catch (e: Exception) {
+                println(e)
+                val errorMessage = ErrorParser.parseHttpError(e)
+                Log.e("RecordsRepository", errorMessage, e)
+                Result(success = false, errorMessage = errorMessage)
+            }
+        }
+    }
+
+    suspend fun updateRecord(recordId: String, name: String, isPublic: Boolean, imageUri: Uri?): Result<Record> {
+        return withContext(Dispatchers.IO) {
+            try {
+                var imagePart: MultipartBody.Part? = null;
+                if (imageUri != null) {
+                    imagePart = RequestHelper.imageUriToMultiPart(context, imageUri, "record_image")
+                }
+                val response = recordsApi.updateRecord(recordId, name.toRequestBody(), isPublic, imagePart)
+                if (!response.isSuccessful) {
+                    throw IllegalStateException(response.errorBody()?.string())
+                }
+                Log.d("RecordsRepository", "Record updated: ${response.body()?._id}")
                 Result(success = true, data = response.body())
             } catch (e: Exception) {
                 println(e)
@@ -49,6 +72,9 @@ class RecordsRepository @Inject constructor(
         return withContext(Dispatchers.IO) {
             try {
                 val response = recordsApi.deleteRecord(recordId)
+                if (!response.isSuccessful) {
+                    throw IllegalStateException(response.errorBody()?.string())
+                }
                 Log.d("RecordsRepository", "Record deleted: $recordId")
                 Result(success = true, data = response.body())
             } catch (e: Exception) {
@@ -63,6 +89,9 @@ class RecordsRepository @Inject constructor(
         return withContext(Dispatchers.IO) {
             try {
                 val response = recordsApi.getAllChunks(recordId)
+                if (!response.isSuccessful) {
+                    throw IllegalStateException(response.errorBody()?.string())
+                }
                 Log.d("RecordsRepository", "Fetched chunks: ${response.body()?.size}")
                 Result(success = true, data = response.body())
             } catch (e: Exception) {
@@ -77,6 +106,9 @@ class RecordsRepository @Inject constructor(
         return withContext(Dispatchers.IO) {
             try {
                 val response = recordsApi.getAllRecords()
+                if (!response.isSuccessful) {
+                    throw IllegalStateException(response.errorBody()?.string())
+                }
                 Log.d("RecordsRepository", "Fetched records: ${response.body()?.size}")
                 Result(success = true, data = response.body())
             } catch (e: Exception) {

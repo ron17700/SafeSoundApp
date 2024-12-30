@@ -1,21 +1,20 @@
 package com.example.safesound.ui.records_list
 
 import android.Manifest
-import android.app.Activity
 import android.app.Dialog
 import android.content.DialogInterface
-import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.util.Log
 import android.view.*
 import android.widget.Toast
-import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
+import com.example.safesound.R
 import com.example.safesound.databinding.FragmentRecordCreationDialogBinding
+import com.example.safesound.network.NetworkModule
 import com.example.safesound.utils.AudioRecorder
 import com.example.safesound.utils.PermissionUtils
 import com.example.safesound.utils.UploadManager
@@ -42,24 +41,61 @@ class RecordCreationDialogFragment : DialogFragment() {
     @Inject
     lateinit var uploadManager: UploadManager
 
-    private lateinit var pickImageLauncher: ActivityResultLauncher<Intent>
-
     private val recordsViewModel: RecordsViewModel by viewModels()
 
 
     private var recordId: String? = null
-    private var selectedImageFile: File? = null
+    private var recordName: String = ""
+    private var isPublic: Boolean = false
+    private var selectedImageUri: Uri? = null
+    private var isEditMode: Boolean = false
+
     private var elapsedTime = 0L
     private var elapsedTimer: CountDownTimer? = null
     private var recordingJob: Job? = null
 
     companion object {
+        fun newInstance(
+            isEditMode: Boolean = false,
+            recordId: String? = null,
+            recordName: String? = null,
+            isPublic: Boolean = false,
+            imageUri: Uri? = null
+        ): RecordCreationDialogFragment {
+            return RecordCreationDialogFragment().apply {
+                arguments = Bundle().apply {
+                    putBoolean("isEditMode", isEditMode)
+                    putString("recordId", recordId)
+                    putString("recordName", recordName)
+                    putBoolean("isPublic", isPublic)
+                    putParcelable("imageUri", imageUri)
+                }
+            }
+        }
         private const val PERMISSION_REQUEST_CODE = 1001
-//        private const val CHUNK_INTERVAL_MS = 10 * 60 * 1000L // 10 minutes
-        private const val CHUNK_INTERVAL_MS = 10 * 1000L // 10 minutes
+        private const val CHUNK_INTERVAL_MS = 10 * 60 * 1000L // 10 minutes
+    }
+
+    private val imagePickerLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        if (uri != null) {
+            selectedImageUri = uri
+            Picasso.get()
+                .load(uri)
+                .fit()
+                .centerCrop()
+                .into(binding.buttonUploadPhoto)
+        }
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        arguments?.let {
+            isEditMode = it.getBoolean("isEditMode", false)
+            recordId = it.getString("recordId")
+            recordName = it.getString("recordName", "")
+            isPublic = it.getBoolean("isPublic", false)
+            selectedImageUri = it.getParcelable("imageUri")
+        }
+
         val dialog = super.onCreateDialog(savedInstanceState)
         dialog.setOnShowListener {
             val window = dialog.window
@@ -91,7 +127,6 @@ class RecordCreationDialogFragment : DialogFragment() {
         super.onViewCreated(view, savedInstanceState)
         setupPermissions()
         setupUI()
-        initializeImagePicker()
         observeViewModel()
     }
 
@@ -114,10 +149,47 @@ class RecordCreationDialogFragment : DialogFragment() {
     }
 
     private fun setupUI() {
-        binding.buttonUploadPhoto.setOnClickListener { openImageChooser() }
-        binding.buttonStartRecord.setOnClickListener { startRecordProcess() }
+        if (isEditMode) {
+            binding.editTextRecordName.setText(recordName)
+            binding.checkBoxPublic.isChecked = isPublic
+            selectedImageUri?.let {
+                Picasso.get()
+                    .load(NetworkModule.BASE_URL + it)
+                    .fit()
+                    .centerCrop()
+                    .placeholder(R.drawable.ic_image)
+                    .error(R.drawable.ic_broken_image)
+                    .into(binding.buttonUploadPhoto)
+            }
+            binding.textViewDialogTitle.text = "Edit Record"
+            binding.buttonStartRecord.text = "Save"
+        } else {
+            binding.textViewDialogTitle.text = "Create New Record"
+            binding.buttonStartRecord.text = "Record"
+        }
+        binding.buttonStartRecord.setOnClickListener {
+            if (isEditMode) {
+                updateRecord()
+            } else {
+                startRecordProcess()
+            }
+        }
         binding.buttonFinishRecording.setOnClickListener { stopRecording() }
         binding.buttonCancel.setOnClickListener { dismiss() }
+        binding.buttonUploadPhoto.setOnClickListener {
+            imagePickerLauncher.launch("image/*")
+        }
+    }
+
+    private fun updateRecord() {
+        recordName = binding.editTextRecordName.text.toString().trim()
+        if (recordName.isEmpty()) {
+            binding.editTextRecordName.error = "Record name is required"
+            return
+        }
+
+        val isPublic = binding.checkBoxPublic.isChecked
+        recordsViewModel.updateRecord(recordId!!, recordName, isPublic, selectedImageUri)
     }
 
     private fun observeViewModel() {
@@ -130,16 +202,19 @@ class RecordCreationDialogFragment : DialogFragment() {
                 dismiss()
             }
         }
+        recordsViewModel.updateRecordResult.observe(viewLifecycleOwner) { result ->
+            dismissSafely()
+        }
     }
 
     private fun startRecordProcess() {
-        val recordName = binding.editTextRecordName.text.toString().trim()
+        recordName = binding.editTextRecordName.text.toString().trim()
         if (recordName.isEmpty()) {
             binding.editTextRecordName.error = "Record name is required"
             return
         }
-        val isPublic = binding.checkBoxPublic.isChecked;
-        recordsViewModel.createRecord(recordName, isPublic, selectedImageFile)
+        isPublic = binding.checkBoxPublic.isChecked;
+        recordsViewModel.createRecord(recordName, isPublic, selectedImageUri)
     }
 
     private fun startRecording() {
@@ -246,43 +321,7 @@ class RecordCreationDialogFragment : DialogFragment() {
         binding.buttonStartRecord.visibility = View.GONE
         binding.buttonCancel.visibility = View.GONE
         binding.buttonUploadPhoto.visibility = View.GONE
-        binding.imageViewPreview.visibility = View.GONE
         binding.checkBoxPublic.visibility = View.GONE
-    }
-
-    private fun initializeImagePicker() {
-        pickImageLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == Activity.RESULT_OK && result.data != null) {
-                result.data?.data?.let { uri ->
-                    selectedImageFile = uriToFile(uri)
-                    Picasso.get()
-                        .load(uri)
-                        .fit()
-                        .centerCrop()
-                        .into(binding.imageViewPreview)
-                    binding.imageViewPreview.visibility = View.VISIBLE
-                    binding.buttonUploadPhoto.visibility = View.GONE
-                }
-            }
-        }
-    }
-
-    private fun openImageChooser() {
-        val intent = Intent(Intent.ACTION_PICK).apply {
-            type = "image/*"
-        }
-        pickImageLauncher.launch(intent)
-    }
-
-    private fun uriToFile(uri: Uri): File {
-        val contentResolver = requireContext().contentResolver
-        val file = File(requireContext().cacheDir, "temp_image.jpg")
-        contentResolver.openInputStream(uri)?.use { inputStream ->
-            file.outputStream().use { outputStream ->
-                inputStream.copyTo(outputStream)
-            }
-        }
-        return file
     }
 
     private fun dismissSafely() {

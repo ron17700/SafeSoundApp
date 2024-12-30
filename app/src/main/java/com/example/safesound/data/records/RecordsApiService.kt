@@ -1,4 +1,4 @@
-package com.example.safesound.data.records_list
+package com.example.safesound.data.records
 
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -8,6 +8,7 @@ import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.Multipart
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Part
 import retrofit2.http.Path
 
@@ -19,7 +20,16 @@ interface RecordsApiService {
         @Part("name") name: RequestBody,
         @Part("isPublic") isPublic: Boolean,
         @Part image: MultipartBody.Part?
-    ): Response<CreateRecordResponse>
+    ): Response<Record>
+
+    @Multipart
+    @PUT("/record/{id}")
+    suspend fun updateRecord(
+        @Path("id") recordId: String,
+        @Part("name") name: RequestBody,
+        @Part("isPublic") isPublic: Boolean,
+        @Part image: MultipartBody.Part?
+    ): Response<Record>
 
     @DELETE("/record/{id}")
     suspend fun deleteRecord(@Path("id") recordId: String): Response<Okio>
@@ -40,5 +50,5 @@ interface RecordsApiService {
         @Part chunkFile: MultipartBody.Part,
         @Part("startTime") startTime: RequestBody,
         @Part("endTime") endTime: RequestBody
-    ): Response<UploadChunkResponse>
+    ): Response<Okio>
 }
