@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center_horizontal">
+
+        <!-- Profile Image -->
+        <ImageButton
+            android:id="@+id/buttonChangeProfileImage"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:layout_marginBottom="16dp"
+            android:contentDescription="Change Profile Image"
+            android:src="@drawable/ic_image"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:scaleType="centerCrop" />
+
+        <!-- Email -->
+        <TextView
+            android:id="@+id/textViewEmail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Email: user@example.com"
+            android:textSize="16sp"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Role -->
+        <TextView
+            android:id="@+id/textViewRole"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Role: User"
+            android:textSize="16sp"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Username -->
+        <EditText
+            android:id="@+id/editTextUsername"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Username"
+            android:text="CurrentUsername"
+            android:textSize="16sp"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Update Button -->
+        <Button
+            android:id="@+id/buttonUpdate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Update"
+            android:textAllCaps="false"
+            android:textSize="18sp"
+            android:textColor="@android:color/white" />
+    </LinearLayout>
+</ScrollView>

@@ -53,21 +53,26 @@ class MainActivity : AppCompatActivity() {
         val navController = findNavController(R.id.nav_host_fragment_content_main)
         appBarConfiguration = AppBarConfiguration(
             setOf(
-                R.id.nav_records_list, R.id.nav_shared_records, R.id.nav_records_map
+                R.id.nav_records_list,
+                R.id.nav_shared_records,
+                R.id.nav_records_map,
+                R.id.nav_user_profile
             ), drawerLayout
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
-            val isTopLevelDestination = appBarConfiguration.topLevelDestinations.contains(destination.id)
+            val isTopLevelDestination =
+                appBarConfiguration.topLevelDestinations.contains(destination.id)
             if (isTopLevelDestination) {
                 binding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
             } else {
                 binding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
             }
         }
-        updateNavHeader()
+        usersViewModel.getCurrentUser()
+        observeViewModel()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -90,7 +95,11 @@ class MainActivity : AppCompatActivity() {
                         }
                         startActivity(intent)
                     } else {
-                        Snackbar.make(binding.root, result.errorMessage ?: "Logout failed", Snackbar.LENGTH_LONG)
+                        Snackbar.make(
+                            binding.root,
+                            result.errorMessage ?: "Logout failed",
+                            Snackbar.LENGTH_LONG
+                        )
                             .setAction("Action", null)
                             .show()
                     }
@@ -98,25 +107,37 @@ class MainActivity : AppCompatActivity() {
                 authViewModel.logout()
                 true
             }
+
             else -> super.onOptionsItemSelected(item)
         }
     }
 
-    private fun updateNavHeader() {
-        usersViewModel.getCurrentUser()
+    private fun observeViewModel() {
+        val headerView = binding.navView.getHeaderView(0)
+        val userEmailTextView = headerView.findViewById<TextView>(R.id.email)
+        val userNameTextView = headerView.findViewById<TextView>(R.id.username)
+        val profileImageView = headerView.findViewById<ImageView>(R.id.profile_image)
         usersViewModel.userResult.observe(this) { result ->
-            val headerView = binding.navView.getHeaderView(0)
-            val userEmailTextView = headerView.findViewById<TextView>(R.id.email)
-            val userNameTextView = headerView.findViewById<TextView>(R.id.username)
-            val profileImageView = headerView.findViewById<ImageView>(R.id.profile_image)
-            if (result.success) {
-                userNameTextView.text = result.data?.userName
-                userEmailTextView.text = result.data?.email
-                Picasso.get()
-                    .load(NetworkModule.BASE_URL + result.data?.profileImage)
-                    .fit()
-                    .centerCrop()
-                    .into(profileImageView)
+            if (result.success && result.data != null) {
+                val currentUser = result.data
+                if (userNameTextView.text.toString() != currentUser.userName) {
+                    userNameTextView.text = currentUser.userName
+                }
+
+                if (userEmailTextView.text.toString() != currentUser.email) {
+                    userEmailTextView.text = currentUser.email
+                }
+                val profileImageUrl = NetworkModule.BASE_URL + currentUser.profileImage
+                if (profileImageView.tag != profileImageUrl) {
+                    profileImageView.tag = profileImageUrl
+                    Picasso.get()
+                        .load(profileImageUrl)
+                        .fit()
+                        .centerCrop()
+                        .placeholder(R.drawable.ic_image)
+                        .error(R.drawable.ic_broken_image)
+                        .into(profileImageView)
+                }
             } else {
                 userNameTextView.visibility = View.GONE
                 userEmailTextView.visibility = View.GONE

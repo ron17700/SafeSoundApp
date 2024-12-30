@@ -90,4 +90,10 @@
         android:id="@+id/nav_records_map"
         android:name="com.example.safesound.ui.records_map.RecordsMapFragment"
         tools:layout="@layout/fragment_records_map" />
+
+    <!-- User Profile -->
+    <fragment
+        android:id="@+id/nav_user_profile"
+        android:name="com.example.safesound.ui.user.UserProfileFragment"
+        tools:layout="@layout/fragment_user_profile" />
 </navigation>
