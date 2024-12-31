@@ -3,20 +3,19 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.hilt)
     alias(libs.plugins.androidx.navigation.safe.args)
+    alias(libs.plugins.google.maps.secrets)
     kotlin("kapt")
 }
 
 android {
     namespace = "com.example.safesound"
     compileSdk = 34
-
     defaultConfig {
         applicationId = "com.example.safesound"
         minSdk = 24
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -39,6 +38,13 @@ android {
     buildFeatures {
         viewBinding = true
     }
+    buildToolsVersion = "34.0.0"
+    secrets {
+        propertiesFileName = "secrets.properties"
+        defaultPropertiesFileName = "local.defaults.properties"
+        ignoreList.add("keyToIgnore") // Ignore the key "keyToIgnore"
+        ignoreList.add("sdk.*")       // Ignore all keys matching the regexp "sdk.*"
+    }
 }
 
 dependencies {
@@ -58,6 +64,9 @@ dependencies {
     implementation(libs.coroutines.android)
     implementation(libs.androidx.security.crypto.ktx)
     implementation(libs.hilt.android)
+    implementation(libs.google.maps)
+    implementation(libs.google.location)
+    implementation(libs.places)
     kapt(libs.hilt.compiler)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

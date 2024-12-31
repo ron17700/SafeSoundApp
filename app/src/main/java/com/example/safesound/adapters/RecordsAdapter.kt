@@ -12,6 +12,7 @@ import com.example.safesound.databinding.ItemRecordBinding
 import com.squareup.picasso.Picasso
 import com.example.safesound.data.records.Record
 import com.example.safesound.network.NetworkModule
+import com.example.safesound.utils.TimestampFormatter.formatIsoToTime
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -48,15 +49,7 @@ class RecordsAdapter @Inject constructor(
     ) : RecyclerView.ViewHolder(binding.root) {
         fun bind(record: Record) {
             binding.textViewRecordName.text = record.name
-            val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX", Locale.getDefault())
-            val outputFormat = SimpleDateFormat("MMM dd, yyyy - HH:mm", Locale.getDefault())
-            val formattedDate = try {
-                val date = inputFormat.parse(record.createdAt)
-                outputFormat.format(date ?: record.createdAt)
-            } catch (e: Exception) {
-                record.createdAt
-            }
-            binding.textViewCreatedDate.text = formattedDate
+            binding.textViewCreatedDate.text = formatIsoToTime(record.createdAt, true)
             val iconResId = when (record.recordClass) {
                 "Natural" -> R.drawable.ic_natural
                 "Good" -> R.drawable.ic_good
