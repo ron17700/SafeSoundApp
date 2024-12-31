@@ -21,6 +21,7 @@ class RecordsAdapter @Inject constructor(
     private val onRecordClick: (Record, Boolean) -> Unit,
     private val onEditClick: (Record) -> Unit,
     private val onDeleteClick: (Record) -> Unit,
+    private val onStarClick: (Record) -> Unit,
 ) : ListAdapter<Record, RecordsAdapter.RecordViewHolder>(RecordDiffCallback()) {
 
     private var isMyRecords: Boolean = true
@@ -31,7 +32,7 @@ class RecordsAdapter @Inject constructor(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecordViewHolder {
         val binding = ItemRecordBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return RecordViewHolder(binding, onRecordClick, onEditClick, onDeleteClick, isMyRecords)
+        return RecordViewHolder(binding, onRecordClick, onEditClick, onDeleteClick, onStarClick, isMyRecords)
     }
 
     override fun onBindViewHolder(holder: RecordViewHolder, position: Int) {
@@ -42,6 +43,7 @@ class RecordsAdapter @Inject constructor(
         private val onRecordClick: (Record, Boolean) -> Unit,
         private val onEditClick: (Record) -> Unit,
         private val onDeleteClick: (Record) -> Unit,
+        private val onStarClick: (Record) -> Unit,
         private val isMyRecords: Boolean
     ) : RecyclerView.ViewHolder(binding.root) {
         fun bind(record: Record) {
@@ -73,9 +75,18 @@ class RecordsAdapter @Inject constructor(
                 .into(binding.imageViewRecordPhoto)
 
             if (isMyRecords) {
-                binding.dropdownMenu.visibility = View.VISIBLE
-                binding.dropdownMenu.setOnClickListener {
+                binding.dynamicIcon.setImageResource(R.drawable.ic_more_vert)
+                binding.dynamicIcon.setOnClickListener {
                     showPopupMenu(it, record)
+                }
+            } else {
+                if (record.isFavorite) {
+                    binding.dynamicIcon.setImageResource(R.drawable.ic_star_full)
+                } else {
+                    binding.dynamicIcon.setImageResource(R.drawable.ic_star_empty)
+                }
+                binding.dynamicIcon.setOnClickListener {
+                    onStarClick(record)
                 }
             }
 

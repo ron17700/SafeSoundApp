@@ -34,11 +34,14 @@ interface RecordsApiService {
     @DELETE("/record/{id}")
     suspend fun deleteRecord(@Path("id") recordId: String): Response<Okio>
 
+    @POST("/record/{id}/like")
+    suspend fun likeRecord(@Path("id") recordId: String): Response<Okio>
+
     @GET("/record")
     suspend fun getAllRecords(): Response<List<Record>>
 
-    @GET("/record/{id}")
-    suspend fun getRecordById(@Path("id") recordId: String): Response<Record>
+    @GET("/record/public")
+    suspend fun getAllPublicRecords(): Response<List<Record>>
 
     @GET("/chunk/{recordId}")
     suspend fun getAllChunks(@Path("recordId") recordId: String): Response<List<Chunk>>

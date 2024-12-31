@@ -13,12 +13,30 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import okhttp3.MultipartBody
 import okio.Okio
+import retrofit2.Response
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
 
-data class Record(val _id: String, val name: String, val createdAt: String, var recordClass: String, val public: Boolean, val image: String?)
-data class Chunk(val _id: String, val name: String, val startTime: String, val endTime: String, var chunkClass: String, val summary: String, val audioFilePath: String)
+data class Record(
+    val _id: String,
+    val name: String,
+    val createdAt: String,
+    var recordClass: String,
+    val public: Boolean,
+    val isFavorite: Boolean,
+    val image: String?
+)
+
+data class Chunk(
+    val _id: String,
+    val name: String,
+    val startTime: String,
+    val endTime: String,
+    var chunkClass: String,
+    val summary: String,
+    val audioFilePath: String
+)
 
 @Singleton
 class RecordsRepository @Inject constructor(
@@ -47,14 +65,20 @@ class RecordsRepository @Inject constructor(
         }
     }
 
-    suspend fun updateRecord(recordId: String, name: String, isPublic: Boolean, imageUri: Uri?): Result<Record> {
+    suspend fun updateRecord(
+        recordId: String,
+        name: String,
+        isPublic: Boolean,
+        imageUri: Uri?
+    ): Result<Record> {
         return withContext(Dispatchers.IO) {
             try {
                 var imagePart: MultipartBody.Part? = null;
                 if (imageUri != null) {
                     imagePart = RequestHelper.imageUriToMultiPart(context, imageUri, "record_image")
                 }
-                val response = recordsApi.updateRecord(recordId, name.toRequestBody(), isPublic, imagePart)
+                val response =
+                    recordsApi.updateRecord(recordId, name.toRequestBody(), isPublic, imagePart)
                 if (!response.isSuccessful) {
                     throw IllegalStateException(response.errorBody()?.string())
                 }
@@ -86,6 +110,23 @@ class RecordsRepository @Inject constructor(
         }
     }
 
+    suspend fun likeRecord(recordId: String): Result<Okio> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = recordsApi.likeRecord(recordId)
+                if (!response.isSuccessful) {
+                    throw IllegalStateException(response.errorBody()?.string())
+                }
+                Log.d("RecordsRepository", "Record like: $recordId")
+                Result(success = true, data = response.body())
+            } catch (e: Exception) {
+                val errorMessage = ErrorParser.parseHttpError(e)
+                Log.e("RecordsRepository", errorMessage, e)
+                Result(success = false, errorMessage = errorMessage)
+            }
+        }
+    }
+
     suspend fun getAllChunks(recordId: String): Result<List<Chunk>> {
         return withContext(Dispatchers.IO) {
             try {
@@ -103,10 +144,15 @@ class RecordsRepository @Inject constructor(
         }
     }
 
-    suspend fun getAllRecords(): Result<List<Record>> {
+    suspend fun getAllRecords(isMyRecords: Boolean): Result<List<Record>> {
         return withContext(Dispatchers.IO) {
             try {
-                val response = recordsApi.getAllRecords()
+                val response = if (isMyRecords) {
+                    recordsApi.getAllRecords()
+                } else {
+                    recordsApi.getAllPublicRecords()
+                }
+
                 if (!response.isSuccessful) {
                     throw IllegalStateException(response.errorBody()?.string())
                 }

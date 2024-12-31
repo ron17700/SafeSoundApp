@@ -17,13 +17,13 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.appcompat.app.AppCompatActivity
-import androidx.transition.Visibility
 import com.example.safesound.R
 import com.example.safesound.databinding.ActivityMainBinding
 import com.example.safesound.network.NetworkModule
 import com.example.safesound.ui.auth.AuthViewModel
 import com.example.safesound.ui.auth.AuthenticationActivity
-import com.example.safesound.ui.records_list.RecordCreationDialogFragment
+import com.example.safesound.ui.records.RecordCreationDialogFragment
+import com.example.safesound.ui.user.UsersViewModel
 import com.squareup.picasso.Picasso
 import dagger.hilt.android.AndroidEntryPoint
 

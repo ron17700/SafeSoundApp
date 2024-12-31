@@ -7,7 +7,7 @@
     <!-- My Records -->
     <fragment
         android:id="@+id/nav_records_list"
-        android:name="com.example.safesound.ui.records_list.RecordsListFragment"
+        android:name="com.example.safesound.ui.records.RecordsListFragment"
         tools:layout="@layout/fragment_records_list">
         <argument
             android:name="isMyRecords"
@@ -28,7 +28,7 @@
     <!-- Record Chunks -->
     <fragment
         android:id="@+id/recordChunksFragment"
-        android:name="com.example.safesound.ui.records_list.RecordChunksFragment"
+        android:name="com.example.safesound.ui.records.RecordChunksFragment"
         tools:layout="@layout/fragment_record_chunks">
         <argument
             android:name="recordId"
@@ -60,14 +60,14 @@
     <!-- Chunk Detail -->
     <fragment
         android:id="@+id/chunkDetailFragment"
-        android:name="com.example.safesound.ui.records_list.ChunkDetailFragment"
+        android:name="com.example.safesound.ui.records.ChunkDetailFragment"
         tools:layout="@layout/fragment_chunk_detail">
     </fragment>
 
     <!-- Shared Records -->
     <fragment
         android:id="@+id/nav_shared_records"
-        android:name="com.example.safesound.ui.records_list.RecordsListFragment"
+        android:name="com.example.safesound.ui.records.RecordsListFragment"
         tools:layout="@layout/fragment_records_list">
         <argument
             android:name="isMyRecords"

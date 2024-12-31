@@ -1,4 +1,4 @@
-package com.example.safesound.ui.records_list
+package com.example.safesound.ui.records
 
 import android.os.Bundle
 import android.view.LayoutInflater

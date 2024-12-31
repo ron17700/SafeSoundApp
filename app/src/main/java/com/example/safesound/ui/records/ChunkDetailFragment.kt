@@ -1,4 +1,4 @@
-package com.example.safesound.ui.records_list
+package com.example.safesound.ui.records
 
 import android.media.MediaPlayer
 import android.os.Bundle
