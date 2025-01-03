@@ -72,6 +72,4 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-    implementation("com.google.android.gms:play-services-auth:20.6.0")
-    implementation("androidx.fragment:fragment-ktx:1.3.6")
 }

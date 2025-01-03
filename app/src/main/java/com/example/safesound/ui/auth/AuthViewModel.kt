@@ -48,6 +48,8 @@ class AuthViewModel @Inject constructor(
             _loginResult.postValue(result)
             if (result.success) {
                 _authState.postValue(true)
+            }
+        }
     }
 
     fun register(userName: String, email: String, password: String, profileImage: Uri?) {
