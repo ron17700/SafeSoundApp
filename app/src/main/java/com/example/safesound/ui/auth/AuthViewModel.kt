@@ -19,6 +19,9 @@ class AuthViewModel @Inject constructor(
     private val _loginResult = MutableLiveData<Result<AuthResponse>>()
     val loginResult: LiveData<Result<AuthResponse>> get() = _loginResult
 
+    private val _googleLoginResult = MutableLiveData<Result<AuthResponse>>()
+    val googleLoginResult: LiveData<Result<AuthResponse>> get() = _googleLoginResult
+
     private val _registerResult = MutableLiveData<Result<AuthResponse>>()
     val registerResult: LiveData<Result<AuthResponse>> get() = _registerResult
 
@@ -37,6 +40,14 @@ class AuthViewModel @Inject constructor(
                 _authState.postValue(true)
             }
         }
+    }
+
+    fun loginWithGoogle(email: String) {
+        viewModelScope.launch {
+            val result = authRepository.signInWithGoogle(email)
+            _loginResult.postValue(result)
+            if (result.success) {
+                _authState.postValue(true)
     }
 
     fun register(userName: String, email: String, password: String, profileImage: Uri?) {

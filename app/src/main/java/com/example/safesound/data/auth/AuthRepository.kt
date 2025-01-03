@@ -1,5 +1,6 @@
 package com.example.safesound.data.auth
 
+import android.app.Activity
 import android.content.Context
 import android.net.Uri
 import android.util.Log
@@ -16,6 +17,7 @@ import javax.inject.Named
 import javax.inject.Singleton
 
 data class LoginRequest(val email: String, val password: String)
+data class LoginWithGoogle(val email: String)
 data class RefreshTokenRequest(val refreshToken: String)
 data class AuthResponse(val accessToken: String?, val refreshToken: String?, val message: String?)
 
@@ -48,6 +50,29 @@ class AuthRepository @Inject constructor(
             } catch (e: Exception) {
                 val errorMessage = ErrorParser.parseHttpError(e)
                 Log.e("AuthRepository", "Login failed: $errorMessage", e)
+                Result(success = false, errorMessage = errorMessage)
+            }
+        }
+    }
+
+    suspend fun signInWithGoogle(email: String): Result<AuthResponse> {
+        Log.d("AuthRepository", "Attempting to sign in with Google, with gmail: $email")
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = unsecureAuthApi.loginWithGoogle(LoginWithGoogle(email))
+                if (!response.isSuccessful) {
+                    throw IllegalStateException(response.errorBody()?.string())
+                }
+                response.body()?.accessToken?.let {
+                    response.body()?.refreshToken?.let { refreshToken ->
+                        tokenManager.saveTokens(it, refreshToken)
+                    }
+                }
+                Log.d("AuthRepository", "Google Login successful and tokens saved")
+                Result(success = true)
+            } catch (e: Exception) {
+                val errorMessage = ErrorParser.parseHttpError(e)
+                Log.e("AuthRepository", "Google Login failed: $errorMessage", e)
                 Result(success = false, errorMessage = errorMessage)
             }
         }

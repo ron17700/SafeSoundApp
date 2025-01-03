@@ -67,8 +67,10 @@ dependencies {
     implementation(libs.google.maps)
     implementation(libs.google.location)
     implementation(libs.places)
+    implementation(libs.play.services.tasks)
     kapt(libs.hilt.compiler)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    implementation("com.google.android.gms:play-services-auth:20.6.0")
 }

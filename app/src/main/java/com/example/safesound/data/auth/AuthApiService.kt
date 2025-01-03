@@ -14,6 +14,9 @@ interface AuthApiService {
     @POST("auth/login")
     suspend fun login(@Body credentials: LoginRequest): Response<AuthResponse>
 
+    @POST("auth/login/google")
+    suspend fun loginWithGoogle(@Body credentials: LoginWithGoogle): Response<AuthResponse>
+
     @Multipart
     @POST("auth/register")
     suspend fun register(
