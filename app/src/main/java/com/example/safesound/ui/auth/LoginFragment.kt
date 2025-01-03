@@ -6,24 +6,24 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.result.launch
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.example.safesound.R
 import com.example.safesound.databinding.FragmentLoginBinding
-import dagger.hilt.android.AndroidEntryPoint
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.Task
+import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class LoginFragment : Fragment() {
     private var _binding: FragmentLoginBinding? = null
     private val binding get() = _binding!!
-    private val googleSignInClient: GoogleSignInClient = TODO()
+    private lateinit var googleSignInClient: GoogleSignInClient
     private val authViewModel: AuthViewModel by viewModels()
 
     private val launcher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -31,27 +31,18 @@ class LoginFragment : Fragment() {
         handleSignInResult(task)
     }
 
-    private fun handleSignInResult(completedTask: Task<GoogleSignInAccount>) {
-        try {
-            val account = completedTask.getResult(ApiException::class.java)
-            // Signed in successfully, send the account to your server
-            sendAccountToServer(account)
-        } catch (e: com.google.android.gms.common.api.ApiException) {
-            // Handle sign-in errors
-        }
-    }
-
-    private fun signInWithGoogle() {
-        val signInIntent = googleSignInClient.signInIntent
-        launcher.launch(signInIntent)
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val googleSignInButton = binding.googleSignInButton
         _binding = FragmentLoginBinding.inflate(inflater, container, false)
+
+        // Initialize GoogleSignInClient
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(getString(R.string.default_web_client_id))
+            .requestEmail()
+            .build()
+        googleSignInClient = GoogleSignIn.getClient(requireActivity(), gso)
 
         binding.loginButton.setOnClickListener {
             val email = binding.emailEditText.text.toString()
@@ -89,6 +80,26 @@ class LoginFragment : Fragment() {
         }
 
         return binding.root
+    }
+
+    private fun signInWithGoogle() {
+        val signInIntent = googleSignInClient.signInIntent
+        launcher.launch(signInIntent)
+    }
+
+    private fun handleSignInResult(completedTask: Task<GoogleSignInAccount>) {
+        try {
+            val account = completedTask.getResult(ApiException::class.java)
+            // Signed in successfully, send the account to your server
+            sendAccountToServer(account)
+        } catch (e: ApiException) {
+            // Handle sign-in errors
+            Toast.makeText(requireContext(), "Google sign-in failed: ${e.statusCode}", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun sendAccountToServer(account: GoogleSignInAccount) {
+        // Implement your logic to send the account to your server
     }
 
     override fun onDestroyView() {
