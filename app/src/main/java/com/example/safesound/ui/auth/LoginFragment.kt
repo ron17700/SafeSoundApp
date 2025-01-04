@@ -36,13 +36,7 @@ class LoginFragment : Fragment() {
         }
 
         binding.googleSignInButton.setOnClickListener {
-            val email = binding.emailEditText.text.toString()
-
-            if (email.isBlank()) {
-                Toast.makeText(requireContext(), "Email cannot be empty", Toast.LENGTH_SHORT).show()
-            } else {
-                authViewModel.loginWithGoogle(email)
-            }
+            authViewModel.loginWithGoogle()
         }
 
         authViewModel.loginResult.observe(viewLifecycleOwner) { result ->

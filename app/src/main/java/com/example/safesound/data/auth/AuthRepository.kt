@@ -17,7 +17,6 @@ import javax.inject.Named
 import javax.inject.Singleton
 
 data class LoginRequest(val email: String, val password: String)
-data class LoginWithGoogle(val email: String)
 data class RefreshTokenRequest(val refreshToken: String)
 data class AuthResponse(val accessToken: String?, val refreshToken: String?, val message: String?)
 
@@ -55,11 +54,11 @@ class AuthRepository @Inject constructor(
         }
     }
 
-    suspend fun signInWithGoogle(email: String): Result<AuthResponse> {
-        Log.d("AuthRepository", "Attempting to sign in with Google, with gmail: $email")
+    suspend fun signInWithGoogle(): Result<AuthResponse> {
+        Log.d("AuthRepository", "Attempting to sign in with Google, with gmail")
         return withContext(Dispatchers.IO) {
             try {
-                val response = unsecureAuthApi.loginWithGoogle(LoginWithGoogle(email))
+                val response = unsecureAuthApi.loginWithGoogle()
                 if (!response.isSuccessful) {
                     throw IllegalStateException(response.errorBody()?.string())
                 }

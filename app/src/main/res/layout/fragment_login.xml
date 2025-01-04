@@ -58,7 +58,7 @@
         android:background="@android:color/darker_gray" />
 
     <TextView
-        android:id="@+id/orSeparator"
+        android:id="@+id/orSeparator2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="OR"

@@ -42,13 +42,10 @@ class AuthViewModel @Inject constructor(
         }
     }
 
-    fun loginWithGoogle(email: String) {
+    fun loginWithGoogle() {
         viewModelScope.launch {
-            val result = authRepository.signInWithGoogle(email)
+            val result = authRepository.signInWithGoogle()
             _loginResult.postValue(result)
-            if (result.success) {
-                _authState.postValue(true)
-            }
         }
     }
 
