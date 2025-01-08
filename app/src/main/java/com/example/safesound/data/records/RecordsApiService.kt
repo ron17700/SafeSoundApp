@@ -43,11 +43,11 @@ interface RecordsApiService {
     @GET("/record/public")
     suspend fun getAllPublicRecords(): Response<List<Record>>
 
-    @GET("/chunk/{recordId}")
+    @GET("/record/{recordId}/chunk")
     suspend fun getAllChunks(@Path("recordId") recordId: String): Response<List<Chunk>>
 
     @Multipart
-    @POST("/chunk/{recordId}")
+    @POST("/record/{recordId}/chunk")
     suspend fun uploadRecordChunk(
         @Path("recordId") recordId: String,
         @Part chunkFile: MultipartBody.Part,
