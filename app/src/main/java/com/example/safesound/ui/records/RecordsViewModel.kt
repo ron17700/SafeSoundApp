@@ -86,9 +86,9 @@ class RecordsViewModel @Inject constructor(
         _deleteRecordResult.value = null
     }
 
-    fun fetchPublicRecords() {
+    fun fetchPublicRecords(refresh: Boolean = false) {
         viewModelScope.launch {
-            val result = recordsRepository.getAllPublicRecords()
+            val result = recordsRepository.getAllPublicRecords(refresh)
             val records = result.map { recordEntity ->
                 Record(recordEntity.id, recordEntity.name, recordEntity.createdAt, recordEntity.recordClass, recordEntity.public, recordEntity.favorite, User(recordEntity.userId, "", "", "", ""), recordEntity.latitude, recordEntity.longitude, recordEntity.image)
             }

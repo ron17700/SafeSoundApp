@@ -82,4 +82,5 @@ dependencies {
     implementation("com.google.android.material:material:1.7.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     kapt("android.arch.persistence.room:compiler:1.0.0-alpha4")
+    implementation("androidx.work:work-runtime-ktx:2.7.1")
 }

@@ -2,11 +2,9 @@ package com.example.safesound.data.records
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import androidx.room.TypeConverters
 import android.content.Context
 import android.net.Uri
 import android.util.Log
-import com.example.safesound.data.auth.TokenManager
 import com.example.safesound.data.user.User
 import kotlinx.coroutines.withContext
 import com.example.safesound.utils.ErrorParser
@@ -14,7 +12,9 @@ import com.example.safesound.utils.RequestHelper
 import com.example.safesound.utils.RequestHelper.toRequestBody
 import com.example.safesound.utils.Result
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import okhttp3.MultipartBody
 import okio.Okio
 import retrofit2.Response
@@ -172,27 +172,52 @@ class RecordsRepository @Inject constructor(
         }
     }
 
-    suspend fun getAllPublicRecords(): List<RecordEntity> {
+
+    suspend fun getAllPublicRecords(refresh: Boolean = false): List<RecordEntity> {
         return withContext(Dispatchers.IO) {
-            val cachedRecords = recordDao.getAllPublicRecords()
-            (if (cachedRecords.isNotEmpty()) {
-                cachedRecords
+            val currentTime = System.currentTimeMillis()
+
+            if (refresh) {
+                fetchFromApi(currentTime)
             } else {
-                val response: Response<List<Record>> = recordsApi.getAllPublicRecords()
-                if (response.isSuccessful) {
-                    response.body()?.let { records ->
-                        val recordEntities = records.map { record: Record ->
-                            RecordEntity(record._id, record.name, record.createdAt, record.recordClass, record.public, record.isFavorite,
-                                record.userId.toString(), record.latitude, record.longitude, record.image)
-                        }
-                        recordDao.deleteAllPublicRecords()
-                        recordDao.insertAll(recordEntities)
-                        recordEntities
-                    } ?: emptyList()
+                val cachedRecords = recordDao.getAllPublicRecords()
+                if (cachedRecords.isNotEmpty()) {
+                    cachedRecords
                 } else {
-                    emptyList()
+                    fetchFromApi(currentTime)
                 }
-            }) as List<RecordEntity>
+            }
+        }
+    }
+
+    private suspend fun fetchFromApi(currentTime: Long): List<RecordEntity> {
+        val response: Response<List<Record>> = recordsApi.getAllPublicRecords()
+        return if (response.isSuccessful) {
+            response.body()?.let { records ->
+                val recordEntities = records.map { record: Record ->
+                    RecordEntity(
+                        record._id, record.name, record.createdAt, record.recordClass, record.public, record.isFavorite,
+                        record.userId.toString(), record.latitude, record.longitude, record.image, currentTime // Set the timestamp
+                    )
+                }
+                recordDao.deleteAllPublicRecords()
+                recordDao.insertAll(recordEntities)
+                recordEntities.forEach { recordEntity ->
+                    recordDao.updateCacheTimestamp(recordEntity.id, currentTime)
+                }
+                recordEntities
+            } ?: emptyList()
+        } else {
+            emptyList()
+        }
+    }
+
+    fun deleteExpiredRecords(ttl: Long) {
+        val currentTime = System.currentTimeMillis()
+        val expiryTime = currentTime - ttl
+
+        CoroutineScope(Dispatchers.IO).launch {
+            recordDao.deleteExpiredRecords(expiryTime)
         }
     }
 }

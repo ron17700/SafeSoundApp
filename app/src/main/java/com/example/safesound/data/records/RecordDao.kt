@@ -6,9 +6,9 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
 
+
 @Dao
 interface RecordDao {
-
     @Query("SELECT * FROM records")
     fun getAllPublicRecords(): List<RecordEntity>
 
@@ -26,4 +26,10 @@ interface RecordDao {
 
     @Delete
     fun delete(record: RecordEntity)
+
+    @Query("UPDATE records SET timestamp = :timestamp WHERE id = :id")
+    fun updateCacheTimestamp(id: String, timestamp: Long): Int
+
+    @Query("DELETE FROM records WHERE timestamp < :expiryTime")
+    fun deleteExpiredRecords(expiryTime: Long): Int
 }
