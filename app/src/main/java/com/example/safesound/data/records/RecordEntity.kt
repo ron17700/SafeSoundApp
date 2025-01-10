@@ -5,15 +5,19 @@ import androidx.room.PrimaryKey
 import com.example.safesound.data.user.User
 
 @Entity(tableName = "records")
-data class RecordEntity(
-    @PrimaryKey val id: String,
-    val name: String,
-    val createdAt: String,
+data class RecordEntity (
+    @PrimaryKey var id: String,
+    var name: String,
+    var createdAt: String,
     var recordClass: String,
-    val public: Boolean,
-    val isFavorite: Boolean,
-    val userId: User?,
-    val latitude: Double?,
-    val longitude: Double?,
-    val image: String?
-)
+    var public: Boolean,
+    var favorite: Boolean,
+    var userId: String,
+    var latitude: Double?,
+    var longitude: Double?,
+    var image: String?
+) {
+    constructor()
+            : this("", "", "", "", false, false, "", null, null, null)
+}
+

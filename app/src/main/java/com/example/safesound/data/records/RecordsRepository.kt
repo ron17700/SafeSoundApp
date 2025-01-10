@@ -52,13 +52,11 @@ class RecordsRepository @Inject constructor(
     @ApplicationContext private val context: Context,
     @Named("recordsApi") private val recordsApi: RecordsApiService,
     private val recordDao: RecordDao
-
-
 ) {
     suspend fun createRecord(name: String, isPublic: Boolean, latitude: Double?, longitude: Double?, imageUri: Uri?): Result<Record> {
         return withContext(Dispatchers.IO) {
             try {
-                var imagePart: MultipartBody.Part? = null;
+                var imagePart: MultipartBody.Part? = null
                 if (imageUri != null) {
                     imagePart = RequestHelper.imageUriToMultiPart(context, imageUri, "record_image")
                 }
@@ -85,7 +83,7 @@ class RecordsRepository @Inject constructor(
     ): Result<Record> {
         return withContext(Dispatchers.IO) {
             try {
-                var imagePart: MultipartBody.Part? = null;
+                var imagePart: MultipartBody.Part? = null
                 if (imageUri != null) {
                     imagePart = RequestHelper.imageUriToMultiPart(context, imageUri, "record_image")
                 }
@@ -177,14 +175,15 @@ class RecordsRepository @Inject constructor(
     suspend fun getAllPublicRecords(): List<RecordEntity> {
         return withContext(Dispatchers.IO) {
             val cachedRecords = recordDao.getAllPublicRecords()
-            if (cachedRecords.isNotEmpty()) {
+            (if (cachedRecords.isNotEmpty()) {
                 cachedRecords
             } else {
                 val response: Response<List<Record>> = recordsApi.getAllPublicRecords()
                 if (response.isSuccessful) {
                     response.body()?.let { records ->
                         val recordEntities = records.map { record: Record ->
-                            RecordEntity(record._id, record.name, record.createdAt, record.recordClass, record.public, record.isFavorite, record.userId, record.latitude, record.longitude, record.image)
+                            RecordEntity(record._id, record.name, record.createdAt, record.recordClass, record.public, record.isFavorite,
+                                record.userId.toString(), record.latitude, record.longitude, record.image)
                         }
                         recordDao.deleteAllPublicRecords()
                         recordDao.insertAll(recordEntities)
@@ -193,7 +192,7 @@ class RecordsRepository @Inject constructor(
                 } else {
                     emptyList()
                 }
-            }
+            }) as List<RecordEntity>
         }
     }
 }

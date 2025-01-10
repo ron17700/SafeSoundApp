@@ -12,6 +12,7 @@ import okio.Okio
 import javax.inject.Inject
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.liveData
+import com.example.safesound.data.user.User
 
 @HiltViewModel
 class RecordsViewModel @Inject constructor(
@@ -89,8 +90,7 @@ class RecordsViewModel @Inject constructor(
         viewModelScope.launch {
             val result = recordsRepository.getAllPublicRecords()
             val records = result.map { recordEntity ->
-                Record(recordEntity.id, recordEntity.name, recordEntity.createdAt, recordEntity.recordClass, recordEntity.public, recordEntity.isFavorite, recordEntity.userId, recordEntity.latitude, recordEntity.longitude, recordEntity.image)
-
+                Record(recordEntity.id, recordEntity.name, recordEntity.createdAt, recordEntity.recordClass, recordEntity.public, recordEntity.favorite, User(recordEntity.userId, "", "", "", ""), recordEntity.latitude, recordEntity.longitude, recordEntity.image)
             }
             _publicRecords.postValue(records)
         }

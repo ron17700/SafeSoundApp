@@ -116,7 +116,7 @@ class RecordsMapFragment : Fragment() {
                 Toast.makeText(requireContext(), "Failed to load records", Toast.LENGTH_SHORT).show()
             }
         }
-        recordsViewModel.fetchAllRecords(false)
+        recordsViewModel.fetchAllRecords()
     }
 
     private fun displayRecordsOnMap(records: List<Record>) {
