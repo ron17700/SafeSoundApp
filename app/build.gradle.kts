@@ -4,7 +4,7 @@ plugins {
     alias(libs.plugins.hilt)
     alias(libs.plugins.androidx.navigation.safe.args)
     alias(libs.plugins.google.maps.secrets)
-    kotlin("kapt")
+    id("kotlin-kapt")
 }
 
 android {
@@ -48,7 +48,6 @@ android {
 }
 
 dependencies {
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
@@ -67,8 +66,18 @@ dependencies {
     implementation(libs.google.maps)
     implementation(libs.google.location)
     implementation(libs.places)
+    implementation(libs.androidx.room.common)
     kapt(libs.hilt.compiler)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    implementation("androidx.room:room-runtime:2.6.1")
+    kapt("androidx.room:room-compiler:2.5.0")
+    implementation("com.google.dagger:hilt-android:2.44")
+    kapt("com.google.dagger:hilt-compiler:2.44")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.8.0")
+    implementation("androidx.core:core-ktx:1.9.0")
+    implementation("androidx.appcompat:appcompat:1.5.1")
+    implementation("com.google.android.material:material:1.7.0")
+    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
 }

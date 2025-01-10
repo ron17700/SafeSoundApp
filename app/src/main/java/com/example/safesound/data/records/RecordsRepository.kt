@@ -1,5 +1,8 @@
 package com.example.safesound.data.records
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+import androidx.room.TypeConverters
 import android.content.Context
 import android.net.Uri
 import android.util.Log
@@ -19,8 +22,10 @@ import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
 
+@Entity(tableName = "public_records")
+
 data class Record(
-    val _id: String,
+    @PrimaryKey val _id: String,
     val name: String,
     val createdAt: String,
     var recordClass: String,
@@ -45,7 +50,10 @@ data class Chunk(
 @Singleton
 class RecordsRepository @Inject constructor(
     @ApplicationContext private val context: Context,
-    @Named("recordsApi") private val recordsApi: RecordsApiService
+    @Named("recordsApi") private val recordsApi: RecordsApiService,
+    private val recordDao: RecordDao
+
+
 ) {
     suspend fun createRecord(name: String, isPublic: Boolean, latitude: Double?, longitude: Double?, imageUri: Uri?): Result<Record> {
         return withContext(Dispatchers.IO) {
@@ -148,14 +156,11 @@ class RecordsRepository @Inject constructor(
         }
     }
 
-    suspend fun getAllRecords(isMyRecords: Boolean): Result<List<Record>> {
+    suspend fun getAllRecords(): Result<List<Record>> {
         return withContext(Dispatchers.IO) {
             try {
-                val response = if (isMyRecords) {
-                    recordsApi.getAllRecords()
-                } else {
-                    recordsApi.getAllPublicRecords()
-                }
+                val response = recordsApi.getAllRecords()
+
                 if (!response.isSuccessful) {
                     throw IllegalStateException(response.errorBody()?.string())
                 }
@@ -165,6 +170,29 @@ class RecordsRepository @Inject constructor(
                 val errorMessage = ErrorParser.parseHttpError(e)
                 Log.e("RecordsRepository", errorMessage, e)
                 Result(success = false, errorMessage = errorMessage)
+            }
+        }
+    }
+
+    suspend fun getAllPublicRecords(): List<RecordEntity> {
+        return withContext(Dispatchers.IO) {
+            val cachedRecords = recordDao.getAllPublicRecords()
+            if (cachedRecords.isNotEmpty()) {
+                cachedRecords
+            } else {
+                val response: Response<List<Record>> = recordsApi.getAllPublicRecords()
+                if (response.isSuccessful) {
+                    response.body()?.let { records ->
+                        val recordEntities = records.map { record: Record ->
+                            RecordEntity(record._id, record.name, record.createdAt, record.recordClass, record.public, record.isFavorite, record.userId, record.latitude, record.longitude, record.image)
+                        }
+                        recordDao.deleteAllPublicRecords()
+                        recordDao.insertAll(recordEntities)
+                        recordEntities
+                    } ?: emptyList()
+                } else {
+                    emptyList()
+                }
             }
         }
     }

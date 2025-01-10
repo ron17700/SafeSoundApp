@@ -10,11 +10,16 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import okio.Okio
 import javax.inject.Inject
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.liveData
 
 @HiltViewModel
 class RecordsViewModel @Inject constructor(
     private val recordsRepository: RecordsRepository
 ) : ViewModel() {
+
+    private val _publicRecords = MutableLiveData<List<Record>>()
+    val publicRecords: LiveData<List<Record>> get() = _publicRecords
 
     private val _createRecordResult = MutableLiveData<Result<Record>>()
     val createRecordResult: LiveData<Result<Record>> get() = _createRecordResult
@@ -69,14 +74,25 @@ class RecordsViewModel @Inject constructor(
         }
     }
 
-    fun fetchAllRecords(isMyRecords: Boolean) {
+    fun fetchAllRecords() {
         viewModelScope.launch {
-            val result = recordsRepository.getAllRecords(isMyRecords)
+            val result = recordsRepository.getAllRecords()
             _allRecordsResult.postValue(result)
         }
     }
 
     fun clearDeleteRecordResult() {
         _deleteRecordResult.value = null
+    }
+
+    fun fetchPublicRecords() {
+        viewModelScope.launch {
+            val result = recordsRepository.getAllPublicRecords()
+            val records = result.map { recordEntity ->
+                Record(recordEntity.id, recordEntity.name, recordEntity.createdAt, recordEntity.recordClass, recordEntity.public, recordEntity.isFavorite, recordEntity.userId, recordEntity.latitude, recordEntity.longitude, recordEntity.image)
+
+            }
+            _publicRecords.postValue(records)
+        }
     }
 }
