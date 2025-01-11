@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">SafeSound</string>
+    <string name="dynamic_record_title">SafeSound - Record %1$s</string>
+    <string name="dynamic_chunk_title">SafeSound - Chunk %1$s</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="nav_header_title">Android Studio</string>

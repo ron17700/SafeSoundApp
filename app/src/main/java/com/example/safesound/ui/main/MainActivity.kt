@@ -2,6 +2,7 @@ package com.example.safesound.ui.main
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -62,7 +63,7 @@ class MainActivity : AppCompatActivity() {
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
 
-        navController.addOnDestinationChangedListener { _, destination, _ ->
+        navController.addOnDestinationChangedListener { _, destination, arguments ->
             val isTopLevelDestination =
                 appBarConfiguration.topLevelDestinations.contains(destination.id)
             if (isTopLevelDestination) {
@@ -76,6 +77,29 @@ class MainActivity : AppCompatActivity() {
             }
             else {
                 binding.appBarMain.fab.visibility = View.VISIBLE
+            }
+
+            when (destination.id) {
+                R.id.nav_records_list -> {
+                    supportActionBar?.title = getString(R.string.menu_my_records)
+                }
+                R.id.nav_shared_records -> {
+                    supportActionBar?.title = getString(R.string.menu_shared_records)
+                }
+                R.id.nav_records_map -> {
+                    supportActionBar?.title = getString(R.string.menu_records_map)
+                }
+                R.id.nav_user_profile -> {
+                    supportActionBar?.title = getString(R.string.menu_user_profile)
+                }
+                R.id.recordChunksFragment -> {
+                    val recordName = arguments?.getString("recordName","")
+                    supportActionBar?.title = getString(R.string.dynamic_record_title, recordName)
+                }
+                R.id.chunkDetailFragment -> {
+                    val chunkName = arguments?.getString("chunkName","")
+                    supportActionBar?.title = getString(R.string.dynamic_chunk_title, chunkName)
+                }
             }
         }
         usersViewModel.getCurrentUser()
