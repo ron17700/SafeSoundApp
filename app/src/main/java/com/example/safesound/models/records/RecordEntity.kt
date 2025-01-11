@@ -1,4 +1,4 @@
-package com.example.safesound.data.records
+package com.example.safesound.models.records
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

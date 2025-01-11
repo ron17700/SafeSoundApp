@@ -1,4 +1,4 @@
-package com.example.safesound.data.records
+package com.example.safesound.models.records
 
 import androidx.room.Dao
 import androidx.room.Delete

@@ -6,6 +6,8 @@ import android.content.Context
 import android.net.Uri
 import android.util.Log
 import com.example.safesound.data.user.User
+import com.example.safesound.models.records.RecordDao
+import com.example.safesound.models.records.RecordEntity
 import kotlinx.coroutines.withContext
 import com.example.safesound.utils.ErrorParser
 import com.example.safesound.utils.RequestHelper
@@ -212,12 +214,4 @@ class RecordsRepository @Inject constructor(
         }
     }
 
-    fun deleteExpiredRecords(ttl: Long) {
-        val currentTime = System.currentTimeMillis()
-        val expiryTime = currentTime - ttl
-
-        CoroutineScope(Dispatchers.IO).launch {
-            recordDao.deleteExpiredRecords(expiryTime)
-        }
-    }
 }

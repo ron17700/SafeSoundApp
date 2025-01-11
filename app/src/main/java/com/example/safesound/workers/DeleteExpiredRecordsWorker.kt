@@ -1,11 +1,14 @@
-package com.example.safesound.data.records
+package com.example.safesound.workers
 
 import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import com.example.safesound.models.records.RecordDao
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import javax.inject.Singleton
 
+@Singleton
 class DeleteExpiredRecordsWorker(
     context: Context,
     workerParams: WorkerParameters,

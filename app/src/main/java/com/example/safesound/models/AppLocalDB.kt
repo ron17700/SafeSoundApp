@@ -7,6 +7,8 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverter
 import androidx.room.TypeConverters
 import com.example.safesound.data.user.User
+import com.example.safesound.models.records.RecordDao
+import com.example.safesound.models.records.RecordEntity
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
