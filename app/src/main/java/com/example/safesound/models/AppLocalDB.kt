@@ -12,6 +12,7 @@ import com.example.safesound.models.records.RecordEntity
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
+
 class Converters {
     @TypeConverter
     fun fromUser(user: User?): String? {
@@ -24,7 +25,7 @@ class Converters {
     }
 }
 
-@Database(entities = [RecordEntity::class], version = 1)
+@Database(entities = [RecordEntity::class], version = 2)
 @TypeConverters(Converters::class)
 abstract class RecordDatabase : RoomDatabase() {
     abstract fun recordDao(): RecordDao
@@ -39,7 +40,7 @@ abstract class RecordDatabase : RoomDatabase() {
                     context.applicationContext,
                     RecordDatabase::class.java,
                     "records_database"
-                ).build()
+                ).fallbackToDestructiveMigration().build()
                 INSTANCE = instance
                 instance
             }

@@ -24,8 +24,6 @@ import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
 
-@Entity(tableName = "public_records")
-
 data class Record(
     @PrimaryKey val _id: String,
     val name: String,
