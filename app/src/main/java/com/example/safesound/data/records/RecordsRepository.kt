@@ -3,7 +3,6 @@ package com.example.safesound.data.records
 import android.content.Context
 import android.net.Uri
 import android.util.Log
-import com.example.safesound.data.auth.TokenManager
 import com.example.safesound.data.user.User
 import kotlinx.coroutines.withContext
 import com.example.safesound.utils.ErrorParser
@@ -14,7 +13,6 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import okhttp3.MultipartBody
 import okio.Okio
-import retrofit2.Response
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
@@ -54,7 +52,7 @@ class RecordsRepository @Inject constructor(
                 if (imageUri != null) {
                     imagePart = RequestHelper.imageUriToMultiPart(context, imageUri, "record_image")
                 }
-                val response = recordsApi.createRecord(name.toRequestBody(), isPublic, imagePart)
+                val response = recordsApi.createRecord(name.toRequestBody(), latitude, longitude, isPublic, imagePart)
                 if (!response.isSuccessful) {
                     throw IllegalStateException(response.errorBody()?.string())
                 }

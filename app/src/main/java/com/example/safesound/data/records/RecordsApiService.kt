@@ -18,6 +18,8 @@ interface RecordsApiService {
     @POST("/record")
     suspend fun createRecord(
         @Part("name") name: RequestBody,
+        @Part("latitude") latitude: Double?,
+        @Part("longitude") longitude: Double?,
         @Part("isPublic") isPublic: Boolean,
         @Part image: MultipartBody.Part?
     ): Response<Record>
