@@ -11,7 +11,6 @@ import kotlinx.coroutines.launch
 import okio.Okio
 import javax.inject.Inject
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.liveData
 import com.example.safesound.data.user.User
 
 @HiltViewModel
@@ -88,7 +87,7 @@ class RecordsViewModel @Inject constructor(
 
     fun fetchPublicRecords(refresh: Boolean = false) {
         viewModelScope.launch {
-            val result = recordsRepository.getAllPublicRecords(refresh)
+            val result = recordsRepository.getAllPublicRecordsCached(refresh)
             val records = result.map { recordEntity ->
                 Record(recordEntity.id, recordEntity.name, recordEntity.createdAt, recordEntity.recordClass, recordEntity.public, recordEntity.favorite, User(recordEntity.userId, "", "", "", ""), recordEntity.latitude, recordEntity.longitude, recordEntity.image)
             }

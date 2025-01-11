@@ -173,24 +173,23 @@ class RecordsRepository @Inject constructor(
     }
 
 
-    suspend fun getAllPublicRecords(refresh: Boolean = false): List<RecordEntity> {
+    suspend fun getAllPublicRecordsCached(refresh: Boolean = false): List<RecordEntity> {
         return withContext(Dispatchers.IO) {
-            val currentTime = System.currentTimeMillis()
+            val cachedRecords = recordDao.getAllPublicRecords()
 
-            if (refresh) {
-                fetchFromApi(currentTime)
-            } else {
-                val cachedRecords = recordDao.getAllPublicRecords()
-                if (cachedRecords.isNotEmpty()) {
+            when {
+                refresh -> getAllPublicRecords()
+                cachedRecords.isNotEmpty() -> {
+                    launch { getAllPublicRecords() }
                     cachedRecords
-                } else {
-                    fetchFromApi(currentTime)
                 }
+                else -> getAllPublicRecords()
             }
         }
     }
 
-    private suspend fun fetchFromApi(currentTime: Long): List<RecordEntity> {
+    private suspend fun getAllPublicRecords(): List<RecordEntity> {
+        val currentTime = System.currentTimeMillis()
         val response: Response<List<Record>> = recordsApi.getAllPublicRecords()
         return if (response.isSuccessful) {
             response.body()?.let { records ->
