@@ -1,12 +1,11 @@
 package com.example.safesound.ui.records_map
 
 import android.app.AlertDialog
-import android.location.Geocoder
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -19,11 +18,6 @@ import com.example.safesound.utils.TimestampFormatter.formatIsoToTime
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.util.Locale
 
 @AndroidEntryPoint
 class RecordsMapFragment : Fragment() {
@@ -49,7 +43,6 @@ class RecordsMapFragment : Fragment() {
 
         binding.mapView.onCreate(savedInstanceState)
         setupMap()
-//        setupSearch()
         observeRecords()
     }
 
@@ -61,7 +54,7 @@ class RecordsMapFragment : Fragment() {
             // Display any pending records
             if (pendingRecords.isNotEmpty()) {
                 displayRecordsOnMap(pendingRecords)
-                pendingRecords.clear() // Clear the list after displaying the markers
+                setupSearch()
             }
 
             // Handle marker click events
@@ -75,54 +68,53 @@ class RecordsMapFragment : Fragment() {
         }
     }
 
-//    private fun setupSearch() {
-//        val searchBar = binding.root.findViewById<EditText>(R.id.searchBar)
-//        searchBar.setOnEditorActionListener { _, actionId, _ ->
-//            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-//                val location = searchBar.text.toString()
-//                if (location.isNotBlank()) {
-//                    searchLocation(location)
-//                }
-//                true
-//            } else {
-//                false
-//            }
-//        }
-//    }
+    private fun setupSearch() {
+        val searchBar = binding.searchBar
 
-    private fun searchLocation(query: String) {
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val geocoder = Geocoder(requireContext(), Locale.getDefault())
-                val addressList = geocoder.getFromLocationName(query, 1)
-                if (!addressList.isNullOrEmpty()) {
-                    val address = addressList[0]
-                    val latLng = LatLng(address.latitude, address.longitude)
-                    withContext(Dispatchers.Main) {
-                        googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 12f))
-                        googleMap.addMarker(MarkerOptions().position(latLng).title(query))
-                    }
-                } else {
-                    withContext(Dispatchers.Main) {
-                        Toast.makeText(requireContext(), "Location not found", Toast.LENGTH_SHORT).show()
-                    }
-                }
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(requireContext(), "Error finding location", Toast.LENGTH_SHORT).show()
-                }
-                Log.e("RecordsMapFragment", "Geocoder error", e)
+        // Extract display names with emails for suggestions
+        val recordDisplayNames = pendingRecords.map { record ->
+            val email = record.userId?.email ?: "No Email"
+            "${record.name} ($email)"
+        }
+
+        // Set up the adapter with display names
+        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, recordDisplayNames)
+        searchBar.setAdapter(adapter)
+
+        // Handle item selection based on the selected display name
+        searchBar.setOnItemClickListener { _, _, _, _ ->
+            val selectedDisplayName = searchBar.text.toString()
+            val selectedRecord = pendingRecords.firstOrNull { record ->
+                val email = record.userId?.email ?: "No Email"
+                "${record.name} ($email)" == selectedDisplayName
             }
+
+            if (selectedRecord != null) {
+                searchLocation(selectedRecord) // Pass the selected record to searchLocation
+            } else {
+                println("Error: Record not found for display name: $selectedDisplayName")
+            }
+        }
+    }
+
+    private fun searchLocation(record: Record) {
+        if (record.latitude != null && record.longitude != null) {
+            val latLng = LatLng(record.latitude, record.longitude)
+
+            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 12f))
+        } else {
+            Toast.makeText(requireContext(), "Location not found in records", Toast.LENGTH_SHORT).show()
         }
     }
 
     private fun observeRecords() {
         recordsViewModel.allRecordsResult.observe(viewLifecycleOwner) { result ->
             if (result.success && !result.data.isNullOrEmpty()) {
+                pendingRecords.clear()
+                pendingRecords.addAll(result.data.filter { it.latitude != null && it.longitude != null })
                 if (::googleMap.isInitialized) {
-                    displayRecordsOnMap(result.data)
-                } else {
-                    pendingRecords.addAll(result.data)
+                    displayRecordsOnMap(pendingRecords)
+                    setupSearch()
                 }
             } else {
                 Toast.makeText(requireContext(), "Failed to load records", Toast.LENGTH_SHORT).show()
