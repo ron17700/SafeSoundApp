@@ -20,6 +20,9 @@
                 android:name="recordId"
                 app:argType="string" />
             <argument
+                android:name="recordName"
+                app:argType="string" />
+            <argument
                 android:name="isMyRecords"
                 app:argType="boolean" />
         </action>
@@ -78,6 +81,9 @@
             app:destination="@id/recordChunksFragment">
             <argument
                 android:name="recordId"
+                app:argType="string" />
+            <argument
+                android:name="recordName"
                 app:argType="string" />
             <argument
                 android:name="isMyRecords"

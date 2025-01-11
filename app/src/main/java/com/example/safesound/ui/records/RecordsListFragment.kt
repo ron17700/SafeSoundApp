@@ -47,7 +47,7 @@ class RecordsListFragment : Fragment() {
     private fun setupRecyclerView() {
         recordsAdapter = RecordsAdapter(
             onRecordClick = { record, isMyRecords ->
-                navigateToRecordChunks(record._id, isMyRecords)
+                navigateToRecordChunks(record._id, record.name, isMyRecords)
             },
             onEditClick = { record -> showEditRecordDialog(record)},
             onDeleteClick = { record ->
@@ -101,8 +101,8 @@ class RecordsListFragment : Fragment() {
         }
     }
 
-    private fun navigateToRecordChunks(recordId: String, isMyRecords: Boolean) {
-        val action = RecordsListFragmentDirections.actionRecordsListFragmentToRecordChunksFragment(recordId, isMyRecords)
+    private fun navigateToRecordChunks(recordId: String, recordName: String, isMyRecords: Boolean) {
+        val action = RecordsListFragmentDirections.actionRecordsListFragmentToRecordChunksFragment(recordId, recordName, isMyRecords)
         findNavController().navigate(action)
     }
 
