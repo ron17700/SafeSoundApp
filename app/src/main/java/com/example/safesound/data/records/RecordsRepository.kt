@@ -57,7 +57,7 @@ class RecordsRepository @Inject constructor(
                 if (imageUri != null) {
                     imagePart = RequestHelper.imageUriToMultiPart(context, imageUri, "record_image")
                 }
-                val response = recordsApi.createRecord(name.toRequestBody(), isPublic, imagePart)
+                val response = recordsApi.createRecord(name.toRequestBody(), latitude, longitude, isPublic, imagePart)
                 if (!response.isSuccessful) {
                     throw IllegalStateException(response.errorBody()?.string())
                 }
