@@ -32,6 +32,8 @@ class RecordsMapFragment : Fragment() {
     private val binding get() = _binding!!
 
     private lateinit var googleMap: GoogleMap
+    private val pendingRecords = mutableListOf<Record>()
+
     private val recordsViewModel: RecordsViewModel by viewModels()
 
     override fun onCreateView(
@@ -55,6 +57,12 @@ class RecordsMapFragment : Fragment() {
         binding.mapView.getMapAsync { map ->
             googleMap = map
             googleMap.uiSettings.isZoomControlsEnabled = true
+
+            // Display any pending records
+            if (pendingRecords.isNotEmpty()) {
+                displayRecordsOnMap(pendingRecords)
+                pendingRecords.clear() // Clear the list after displaying the markers
+            }
 
             // Handle marker click events
             googleMap.setOnMarkerClickListener { marker ->
@@ -111,7 +119,11 @@ class RecordsMapFragment : Fragment() {
     private fun observeRecords() {
         recordsViewModel.allRecordsResult.observe(viewLifecycleOwner) { result ->
             if (result.success && !result.data.isNullOrEmpty()) {
-                displayRecordsOnMap(result.data)
+                if (::googleMap.isInitialized) {
+                    displayRecordsOnMap(result.data)
+                } else {
+                    pendingRecords.addAll(result.data)
+                }
             } else {
                 Toast.makeText(requireContext(), "Failed to load records", Toast.LENGTH_SHORT).show()
             }
