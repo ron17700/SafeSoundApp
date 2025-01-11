@@ -41,11 +41,7 @@ class RecordsListFragment : Fragment() {
         setupRecyclerView()
         observeViewModel()
         setupFragmentResultListener()
-        if (isMyRecords) {
-            recordsViewModel.fetchAllRecords()
-        } else {
-            recordsViewModel.fetchPublicRecords()
-        }
+        recordsViewModel.fetchAllRecords(isMyRecords)
     }
 
     private fun setupRecyclerView() {
@@ -77,29 +73,20 @@ class RecordsListFragment : Fragment() {
     }
 
     private fun observeViewModel() {
-        recordsViewModel.allRecordsResult.observe(viewLifecycleOwner) { result ->
-            if (result.success && !result.data.isNullOrEmpty()) {
-                recordsAdapter.submitList(result.data)
+        recordsViewModel.allRecordsResult.observe(viewLifecycleOwner) { records ->
+            if (records.isNotEmpty()) {
+                recordsAdapter.submitList(records)
                 showRecordsList()
             } else {
                 showPlaceholder()
             }
         }
 
-        recordsViewModel.publicRecords.observe(viewLifecycleOwner) { records ->
-            recordsAdapter.submitList(records)
-        }
-
         recordsViewModel.deleteRecordResult.observe(viewLifecycleOwner) { result ->
             if (result == null) return@observe
             if (result.success) {
                 Toast.makeText(requireContext(), "Record deleted", Toast.LENGTH_SHORT).show()
-
-                if (isMyRecords) {
-                    recordsViewModel.fetchAllRecords()
-                } else {
-                    recordsViewModel.fetchPublicRecords()
-                }
+                recordsViewModel.fetchAllRecords(isMyRecords)
             } else {
                 Toast.makeText(requireContext(), "Failed to delete record", Toast.LENGTH_SHORT).show()
             }
@@ -109,11 +96,7 @@ class RecordsListFragment : Fragment() {
         recordsViewModel.likeRecordsResult.observe(viewLifecycleOwner) { result ->
             if (result == null) return@observe
             if (result.success) {
-                if (isMyRecords) {
-                    recordsViewModel.fetchAllRecords()
-                } else {
-                    recordsViewModel.fetchPublicRecords(true)
-                }
+                recordsViewModel.fetchAllRecords(isMyRecords, true)
             }
         }
     }
@@ -135,11 +118,7 @@ class RecordsListFragment : Fragment() {
 
     private fun setupFragmentResultListener() {
         requireActivity().supportFragmentManager.setFragmentResultListener("refreshRecords", this) { _, _ ->
-            if (isMyRecords) {
-                recordsViewModel.fetchAllRecords()
-            } else {
-                recordsViewModel.fetchPublicRecords()
-            }
+            recordsViewModel.fetchAllRecords(isMyRecords)
         }
     }
 

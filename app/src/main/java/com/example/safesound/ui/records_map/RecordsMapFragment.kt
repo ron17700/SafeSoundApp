@@ -109,14 +109,14 @@ class RecordsMapFragment : Fragment() {
     }
 
     private fun observeRecords() {
-        recordsViewModel.allRecordsResult.observe(viewLifecycleOwner) { result ->
-            if (result.success && !result.data.isNullOrEmpty()) {
-                displayRecordsOnMap(result.data)
+        recordsViewModel.allRecordsResult.observe(viewLifecycleOwner) { records ->
+            if (records.isNotEmpty()) {
+                displayRecordsOnMap(records)
             } else {
                 Toast.makeText(requireContext(), "Failed to load records", Toast.LENGTH_SHORT).show()
             }
         }
-        recordsViewModel.fetchAllRecords()
+        recordsViewModel.fetchAllRecords(false)
     }
 
     private fun displayRecordsOnMap(records: List<Record>) {

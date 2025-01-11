@@ -25,7 +25,7 @@ class Converters {
     }
 }
 
-@Database(entities = [RecordEntity::class], version = 2)
+@Database(entities = [RecordEntity::class], version = 3)
 @TypeConverters(Converters::class)
 abstract class RecordDatabase : RoomDatabase() {
     abstract fun recordDao(): RecordDao

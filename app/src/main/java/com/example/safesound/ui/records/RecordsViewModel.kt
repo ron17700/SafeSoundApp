@@ -18,9 +18,6 @@ class RecordsViewModel @Inject constructor(
     private val recordsRepository: RecordsRepository
 ) : ViewModel() {
 
-    private val _publicRecords = MutableLiveData<List<Record>>()
-    val publicRecords: LiveData<List<Record>> get() = _publicRecords
-
     private val _createRecordResult = MutableLiveData<Result<Record>>()
     val createRecordResult: LiveData<Result<Record>> get() = _createRecordResult
 
@@ -33,8 +30,8 @@ class RecordsViewModel @Inject constructor(
     private val _allChunksResult = MutableLiveData<Result<List<Chunk>>>()
     val allChunksResult: LiveData<Result<List<Chunk>>> get() = _allChunksResult
 
-    private val _allRecordsResult = MutableLiveData<Result<List<Record>>>()
-    val allRecordsResult: LiveData<Result<List<Record>>> get() = _allRecordsResult
+    private val _allRecordsResult = MutableLiveData<List<Record>>()
+    val allRecordsResult: LiveData<List<Record>> get() = _allRecordsResult
 
     private val _likeRecordsResult = MutableLiveData<Result<Okio>>()
     val likeRecordsResult: LiveData<Result<Okio>> get() = _likeRecordsResult
@@ -74,24 +71,17 @@ class RecordsViewModel @Inject constructor(
         }
     }
 
-    fun fetchAllRecords() {
+    fun fetchAllRecords(isMyRecords: Boolean, refresh: Boolean = false) {
         viewModelScope.launch {
-            val result = recordsRepository.getAllRecords()
-            _allRecordsResult.postValue(result)
+            val result = recordsRepository.getAllRecordsCached(isMyRecords, refresh)
+            val records = result.map { recordEntity ->
+                Record(recordEntity.id, recordEntity.name, recordEntity.createdAt, recordEntity.recordClass, recordEntity.public, recordEntity.favorite, User(recordEntity.userId, "", "", "", ""), recordEntity.latitude, recordEntity.longitude, recordEntity.image)
+            }
+            _allRecordsResult.postValue(records)
         }
     }
 
     fun clearDeleteRecordResult() {
         _deleteRecordResult.value = null
-    }
-
-    fun fetchPublicRecords(refresh: Boolean = false) {
-        viewModelScope.launch {
-            val result = recordsRepository.getAllPublicRecordsCached(refresh)
-            val records = result.map { recordEntity ->
-                Record(recordEntity.id, recordEntity.name, recordEntity.createdAt, recordEntity.recordClass, recordEntity.public, recordEntity.favorite, User(recordEntity.userId, "", "", "", ""), recordEntity.latitude, recordEntity.longitude, recordEntity.image)
-            }
-            _publicRecords.postValue(records)
-        }
     }
 }

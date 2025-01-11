@@ -1,6 +1,5 @@
 package com.example.safesound.data.records
 
-import androidx.room.Entity
 import androidx.room.PrimaryKey
 import android.content.Context
 import android.net.Uri
@@ -14,12 +13,10 @@ import com.example.safesound.utils.RequestHelper
 import com.example.safesound.utils.RequestHelper.toRequestBody
 import com.example.safesound.utils.Result
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import okhttp3.MultipartBody
 import okio.Okio
-import retrofit2.Response
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
@@ -154,55 +151,40 @@ class RecordsRepository @Inject constructor(
         }
     }
 
-    suspend fun getAllRecords(): Result<List<Record>> {
+    suspend fun getAllRecordsCached(isMyRecords: Boolean, refresh: Boolean = false): List<RecordEntity> {
         return withContext(Dispatchers.IO) {
-            try {
-                val response = recordsApi.getAllRecords()
-
-                if (!response.isSuccessful) {
-                    throw IllegalStateException(response.errorBody()?.string())
-                }
-                Log.d("RecordsRepository", "Fetched records: ${response.body()?.size}")
-                Result(success = true, data = response.body())
-            } catch (e: Exception) {
-                val errorMessage = ErrorParser.parseHttpError(e)
-                Log.e("RecordsRepository", errorMessage, e)
-                Result(success = false, errorMessage = errorMessage)
-            }
-        }
-    }
-
-
-    suspend fun getAllPublicRecordsCached(refresh: Boolean = false): List<RecordEntity> {
-        return withContext(Dispatchers.IO) {
-            val cachedRecords = recordDao.getAllPublicRecords()
+            val cachedRecords = recordDao.getRecordsByType(isMyRecords)
 
             when {
-                refresh -> getAllPublicRecords()
+                refresh -> getAllRecords(isMyRecords)
                 cachedRecords.isNotEmpty() -> {
-                    launch { getAllPublicRecords() }
+                    launch { getAllRecords(isMyRecords) }
                     cachedRecords
                 }
-                else -> getAllPublicRecords()
+                else -> getAllRecords(isMyRecords)
             }
         }
     }
 
-    private suspend fun getAllPublicRecords(): List<RecordEntity> {
+    private suspend fun getAllRecords(isMyRecords: Boolean): List<RecordEntity> {
         val currentTime = System.currentTimeMillis()
-        val response: Response<List<Record>> = recordsApi.getAllPublicRecords()
+        val response = if (isMyRecords) {
+            recordsApi.getAllRecords()
+        } else {
+            recordsApi.getAllPublicRecords()
+        }
         return if (response.isSuccessful) {
             response.body()?.let { records ->
                 val recordEntities = records.map { record: Record ->
                     RecordEntity(
                         record._id, record.name, record.createdAt, record.recordClass, record.public, record.isFavorite,
-                        record.userId.toString(), record.latitude, record.longitude, record.image, currentTime // Set the timestamp
+                        record.userId.toString(), record.latitude, record.longitude, record.image, currentTime
                     )
                 }
-                recordDao.deleteAllPublicRecords()
+                recordDao.deleteRecordsByType(isMyRecords)
                 recordDao.insertAll(recordEntities)
                 recordEntities.forEach { recordEntity ->
-                    recordDao.updateCacheTimestamp(recordEntity.id, currentTime)
+                    recordDao.updateCacheTimestampByType(recordEntity.id, currentTime, isMyRecords)
                 }
                 recordEntities
             } ?: emptyList()
