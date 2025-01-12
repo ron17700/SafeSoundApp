@@ -108,10 +108,10 @@ class RecordsMapFragment : Fragment() {
     }
 
     private fun observeRecords() {
-        recordsViewModel.allRecordsResult.observe(viewLifecycleOwner) { records ->
-            if (records.isNotEmpty()) {
+        recordsViewModel.allRecordsResult.observe(viewLifecycleOwner) { result ->
+            if (result.success && !result.data.isNullOrEmpty()) {
                 pendingRecords.clear()
-                pendingRecords.addAll(records.filter { it.latitude != null && it.longitude != null })
+                pendingRecords.addAll(result.data.filter { it.latitude != null && it.longitude != null })
                 if (::googleMap.isInitialized) {
                     displayRecordsOnMap(pendingRecords)
                     setupSearch()

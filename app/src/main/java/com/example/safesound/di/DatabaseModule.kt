@@ -1,7 +1,7 @@
 package com.example.safesound.di
 
 import android.content.Context
-import com.example.safesound.data.records.RecordDatabase
+import com.example.safesound.models.RecordDatabase
 import com.example.safesound.models.records.RecordDao
 import dagger.Module
 import dagger.Provides

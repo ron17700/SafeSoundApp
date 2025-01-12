@@ -30,8 +30,8 @@ class RecordsViewModel @Inject constructor(
     private val _allChunksResult = MutableLiveData<Result<List<Chunk>>>()
     val allChunksResult: LiveData<Result<List<Chunk>>> get() = _allChunksResult
 
-    private val _allRecordsResult = MutableLiveData<List<Record>>()
-    val allRecordsResult: LiveData<List<Record>> get() = _allRecordsResult
+    private val _allRecordsResult = MutableLiveData<Result<List<Record>>>()
+    val allRecordsResult: LiveData<Result<List<Record>>> get() = _allRecordsResult
 
     private val _likeRecordsResult = MutableLiveData<Result<Okio>>()
     val likeRecordsResult: LiveData<Result<Okio>> get() = _likeRecordsResult
@@ -74,10 +74,7 @@ class RecordsViewModel @Inject constructor(
     fun fetchAllRecords(isMyRecords: Boolean, refresh: Boolean = false) {
         viewModelScope.launch {
             val result = recordsRepository.getAllRecordsCached(isMyRecords, refresh)
-            val records = result.map { recordEntity ->
-                Record(recordEntity.id, recordEntity.name, recordEntity.createdAt, recordEntity.recordClass, recordEntity.public, recordEntity.favorite, User(recordEntity.userId, "", "", "", ""), recordEntity.latitude, recordEntity.longitude, recordEntity.image)
-            }
-            _allRecordsResult.postValue(records)
+            _allRecordsResult.postValue(result)
         }
     }
 

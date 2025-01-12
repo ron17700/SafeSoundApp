@@ -73,9 +73,9 @@ class RecordsListFragment : Fragment() {
     }
 
     private fun observeViewModel() {
-        recordsViewModel.allRecordsResult.observe(viewLifecycleOwner) { records ->
-            if (records.isNotEmpty()) {
-                recordsAdapter.submitList(records)
+        recordsViewModel.allRecordsResult.observe(viewLifecycleOwner) { result ->
+            if (result.success && !result.data.isNullOrEmpty()) {
+                recordsAdapter.submitList(result.data)
                 showRecordsList()
             } else {
                 showPlaceholder()
@@ -86,7 +86,7 @@ class RecordsListFragment : Fragment() {
             if (result == null) return@observe
             if (result.success) {
                 Toast.makeText(requireContext(), "Record deleted", Toast.LENGTH_SHORT).show()
-                recordsViewModel.fetchAllRecords(isMyRecords)
+                recordsViewModel.fetchAllRecords(isMyRecords, true)
             } else {
                 Toast.makeText(requireContext(), "Failed to delete record", Toast.LENGTH_SHORT).show()
             }
@@ -118,7 +118,7 @@ class RecordsListFragment : Fragment() {
 
     private fun setupFragmentResultListener() {
         requireActivity().supportFragmentManager.setFragmentResultListener("refreshRecords", this) { _, _ ->
-            recordsViewModel.fetchAllRecords(isMyRecords)
+            recordsViewModel.fetchAllRecords(isMyRecords, true)
         }
     }
 

@@ -1,32 +1,13 @@
-package com.example.safesound.data.records
+package com.example.safesound.models
 
 import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import androidx.room.TypeConverter
-import androidx.room.TypeConverters
-import com.example.safesound.data.user.User
 import com.example.safesound.models.records.RecordDao
 import com.example.safesound.models.records.RecordEntity
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 
-
-class Converters {
-    @TypeConverter
-    fun fromUser(user: User?): String? {
-        return Gson().toJson(user)
-    }
-
-    @TypeConverter
-    fun toUser(userString: String?): User? {
-        return Gson().fromJson(userString, object : TypeToken<User>() {}.type)
-    }
-}
-
-@Database(entities = [RecordEntity::class], version = 3)
-@TypeConverters(Converters::class)
+@Database(entities = [RecordEntity::class], version = 1)
 abstract class RecordDatabase : RoomDatabase() {
     abstract fun recordDao(): RecordDao
 
