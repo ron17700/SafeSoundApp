@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.androidx.navigation.safe.args)
     alias(libs.plugins.google.maps.secrets)
     kotlin("kapt")
+    id("kotlin-kapt")
 }
 
 android {
@@ -71,4 +72,8 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    implementation(libs.androidx.room.common)
+    kapt(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.work.runtime)
 }

@@ -10,6 +10,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import okio.Okio
 import javax.inject.Inject
+import androidx.lifecycle.ViewModel
+import com.example.safesound.data.user.User
 
 @HiltViewModel
 class RecordsViewModel @Inject constructor(
@@ -69,9 +71,9 @@ class RecordsViewModel @Inject constructor(
         }
     }
 
-    fun fetchAllRecords(isMyRecords: Boolean) {
+    fun fetchAllRecords(isMyRecords: Boolean, refresh: Boolean = false) {
         viewModelScope.launch {
-            val result = recordsRepository.getAllRecords(isMyRecords)
+            val result = recordsRepository.getAllRecordsCached(isMyRecords, refresh)
             _allRecordsResult.postValue(result)
         }
     }
