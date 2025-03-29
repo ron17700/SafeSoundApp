@@ -21,8 +21,8 @@ data class RecordEntity(
     var latitude: Double?,
     var longitude: Double?,
     var image: String?,
-    var timestamp: Long?,
-    var isMyRecords: Boolean
+    var isMyRecords: Boolean,
+    var timestamp: Long = System.currentTimeMillis()
 )
 
 fun RecordEntity.toRecord(): Record {
