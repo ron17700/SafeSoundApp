@@ -4,6 +4,7 @@ import androidx.room.PrimaryKey
 import android.content.Context
 import android.net.Uri
 import android.util.Log
+import com.example.safesound.data.auth.TokenManager
 import com.example.safesound.data.user.User
 import com.example.safesound.models.records.RecordDao
 import com.example.safesound.models.records.RecordEntity
@@ -49,6 +50,7 @@ data class Chunk(
 class RecordsRepository @Inject constructor(
     @ApplicationContext private val context: Context,
     @Named("recordsApi") private val recordsApi: RecordsApiService,
+    private val tokenManager: TokenManager,
     private val recordDao: RecordDao
 ) {
     suspend fun createRecord(
@@ -169,7 +171,15 @@ class RecordsRepository @Inject constructor(
         refresh: Boolean = false
     ): Result<List<Record>> {
         return withContext(Dispatchers.IO) {
-            val cachedRecords = recordDao.getRecordsByType(isMyRecords)
+            val expirationTime = System.currentTimeMillis() - 600_000 // 10 minutes ago
+            recordDao.evictOldEntries(expirationTime)
+            val user = tokenManager.getUser()
+            val cachedRecords: List<RecordEntity>?
+            if (isMyRecords) {
+                cachedRecords = recordDao.getRecords(user._id)
+            } else {
+                cachedRecords = recordDao.getPublicRecords()
+            }
             if (refresh || cachedRecords.isEmpty()) {
                 val apiResult = getAllRecords(isMyRecords)
                 if (apiResult.success) {
@@ -193,7 +203,7 @@ class RecordsRepository @Inject constructor(
     }
 
     private suspend fun getAllRecords(isMyRecords: Boolean): Result<List<RecordEntity>> {
-        val currentTime = System.currentTimeMillis()
+        val user = tokenManager.getUser()
         try {
             val response = if (isMyRecords) {
                 recordsApi.getAllRecords()
@@ -220,19 +230,15 @@ class RecordsRepository @Inject constructor(
                             record.latitude,
                             record.longitude,
                             record.image,
-                            currentTime,
                             isMyRecords
                         )
                     }
-                    recordDao.deleteRecordsByType(isMyRecords)
+                    if (isMyRecords) {
+                        recordDao.deleteRecords(user._id)
+                    } else {
+                        recordDao.deletePublicRecords()
+                    }
                     recordDao.insertAll(recordEntities)
-                    recordEntities.forEach { recordEntity ->
-                        recordDao.updateCacheTimestampByType(
-                            recordEntity.id,
-                            currentTime,
-                            isMyRecords
-                        )
-                    }
                     recordEntities
                 } ?: emptyList()
                 Log.d("RecordsRepository", "Fetched records: ${response.body()?.size}")

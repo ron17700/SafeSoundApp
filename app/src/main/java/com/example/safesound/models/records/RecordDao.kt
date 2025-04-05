@@ -7,15 +7,21 @@ import androidx.room.Query
 
 @Dao
 interface RecordDao {
-    @Query("SELECT * FROM records WHERE isMyRecords = :isMyRecords")
-    fun getRecordsByType(isMyRecords: Boolean): List<RecordEntity>
+    @Query("SELECT * FROM records WHERE userId= :userId ORDER BY createdAt")
+    fun getRecords(userId: String): List<RecordEntity>
 
-    @Query("DELETE FROM records WHERE isMyRecords = :isMyRecords")
-    fun deleteRecordsByType(isMyRecords: Boolean)
+    @Query("SELECT * FROM records WHERE isMyRecords = 0 ORDER BY createdAt")
+    fun getPublicRecords(): List<RecordEntity>
+
+    @Query("DELETE FROM records WHERE userId= :userId")
+    fun deleteRecords(userId: String)
+
+    @Query("DELETE FROM records WHERE isMyRecords = 0")
+    fun deletePublicRecords()
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertAll(records: List<RecordEntity>)
 
-    @Query("UPDATE records SET timestamp = :timestamp WHERE id = :id AND isMyRecords = :isMyRecords")
-    fun updateCacheTimestampByType(id: String, timestamp: Long, isMyRecords: Boolean): Int
+    @Query("DELETE FROM records WHERE timestamp < :expirationTime")
+    fun evictOldEntries(expirationTime: Long)
 }
