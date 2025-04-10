@@ -13,8 +13,6 @@ import com.squareup.picasso.Picasso
 import com.example.safesound.data.records.Record
 import com.example.safesound.network.NetworkModule
 import com.example.safesound.utils.TimestampFormatter.formatIsoToTime
-import java.text.SimpleDateFormat
-import java.util.Locale
 
 import javax.inject.Inject
 
@@ -52,9 +50,10 @@ class RecordsAdapter @Inject constructor(
             binding.textViewCreatedDate.text = formatIsoToTime(record.createdAt, true)
             val iconResId = when (record.recordClass) {
                 "Natural" -> R.drawable.ic_natural
+                "In progress" -> R.drawable.ic_progress
                 "Good" -> R.drawable.ic_good
                 "Bad" -> R.drawable.ic_bad
-                else -> R.drawable.ic_natural
+                else -> R.drawable.ic_progress
             }
             binding.imageViewClassIcon.setImageResource(iconResId)
 
