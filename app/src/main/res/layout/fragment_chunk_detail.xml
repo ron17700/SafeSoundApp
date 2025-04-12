@@ -72,14 +72,48 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="16dp">
 
-        <TextView
-            android:id="@+id/textViewChunkSummary"
+        <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="12dp"
-            android:text="Speech-to-Text Summary"
-            android:textSize="16sp"
-            android:textColor="@color/black" />
+            android:layout_margin="8dp"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="4dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:id="@+id/textViewSummaryTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Summary"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/black"
+                    android:layout_marginBottom="8dp" />
+
+                <TextView
+                    android:id="@+id/textViewChunkSummary"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Speech-to-Text Summary"
+                    android:textSize="16sp"
+                    android:textColor="@color/black" />
+
+                <TextView
+                    android:id="@+id/textViewEmptySummary"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Summary is being generated. Please check back later."
+                    android:textSize="16sp"
+                    android:textColor="@android:color/darker_gray"
+                    android:textStyle="italic"
+                    android:visibility="gone" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
     </ScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
