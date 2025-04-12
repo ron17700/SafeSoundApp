@@ -69,7 +69,7 @@ class RecordChunksFragment : Fragment() {
             chunkId = chunk._id,
             chunkName = chunk.name,
             audioFilePath = chunk.audioFilePath,
-            summary = chunk.summary,
+            summary = chunk.summary ?: "",
             isMyRecords = isMyRecords
         )
         findNavController().navigate(action)

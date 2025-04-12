@@ -79,7 +79,16 @@ class ChunkDetailFragment : Fragment() {
 
     private fun setupUI() {
         binding.textViewChunkName.text = chunk.name
-        binding.textViewChunkSummary.text = chunk.summary
+        
+        if (chunk.summary.isEmpty()) {
+            binding.textViewChunkSummary.visibility = View.GONE
+            binding.textViewEmptySummary.visibility = View.VISIBLE
+        } else {
+            binding.textViewChunkSummary.text = chunk.summary
+            binding.textViewChunkSummary.visibility = View.VISIBLE
+            binding.textViewEmptySummary.visibility = View.GONE
+        }
+        
         updatePlayPauseButton()
     }
 
