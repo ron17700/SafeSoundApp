@@ -56,10 +56,37 @@ class RecordChunksFragment : Fragment() {
         }
     }
 
+    private fun groupChunks(chunks: List<Chunk>): List<ChunkItem> {
+        val grouped = mutableListOf<ChunkItem>()
+        var silentStart: String? = null
+        var silentEnd: String? = null
+
+        for (chunk in chunks) {
+            if (chunk.summary == "No meaningful audio detected") {
+                if (silentStart == null) silentStart = chunk.startTime
+                silentEnd = chunk.endTime
+            } else {
+                if (silentStart != null) {
+                    grouped.add(ChunkItem.SilentGroup(silentStart, silentEnd ?: silentStart))
+                    silentStart = null
+                }
+                grouped.add(ChunkItem.Regular(chunk))
+            }
+        }
+
+        if (silentStart != null) {
+            grouped.add(ChunkItem.SilentGroup(silentStart, silentEnd ?: silentStart))
+        }
+
+        return grouped
+    }
+
+
     private fun observeViewModel() {
         recordsViewModel.allChunksResult.observe(viewLifecycleOwner) { result ->
             if (result.success && !result.data.isNullOrEmpty()) {
-                chunksAdapter.submitList(result.data)
+                val processedList = groupChunks(result.data)
+                chunksAdapter.submitList(processedList)
             }
         }
     }
