@@ -18,6 +18,7 @@ roomCommon = "2.6.1"
 roomKtx = "2.6.1"
 roomRuntime = "2.6.1"
 workRunTime = "2.7.1"
+google-services = "4.4.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -54,4 +55,4 @@ kotlin-android = { id = "org.jetbrains.kotlin.android", version = "2.0.0" }
 hilt = { id = "com.google.dagger.hilt.android", version = "2.51.1" }
 androidx-navigation-safe-args = { id = "androidx.navigation.safeargs.kotlin", version.ref = "navigationUiKtx" }
 google-maps-secrets = { id = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin", version = "2.0.1" }
-
+google-services = { id = "com.google.gms.google-services", version.ref = "google-services" }

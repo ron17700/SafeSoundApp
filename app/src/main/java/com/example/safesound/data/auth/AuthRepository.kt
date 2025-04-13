@@ -26,12 +26,16 @@ class AuthRepository @Inject constructor(
     @Named("authApi") private val authApi: AuthApiService,
     private val tokenManager: TokenManager
 ) {
+    companion object {
+        private const val TAG = "AuthRepository"
+    }
+
     fun isUserLoggedIn(): Boolean {
         return tokenManager.isUserLoggedIn()
     }
 
     suspend fun login(email: String, password: String): Result<AuthResponse> {
-        Log.d("AuthRepository", "Attempting to log in with email: $email")
+        Log.d(TAG, "Attempting to log in with email: $email")
         return withContext(Dispatchers.IO) {
             try {
                 val response = unsecureAuthApi.login(LoginRequest(email, password))
@@ -41,20 +45,25 @@ class AuthRepository @Inject constructor(
                 response.body()?.accessToken?.let {
                     response.body()?.refreshToken?.let { refreshToken ->
                         tokenManager.saveTokens(it, refreshToken)
+                        updateFcmToken().let { fcmResult ->
+                            if (!fcmResult.success) {
+                                Log.e(TAG, "Failed to update FCM token: ${fcmResult.errorMessage}")
+                            }
+                        }
                     }
                 }
-                Log.d("AuthRepository", "Login successful and tokens saved")
+                Log.d(TAG, "Login successful and tokens saved")
                 Result(success = true)
             } catch (e: Exception) {
                 val errorMessage = ErrorParser.parseHttpError(e)
-                Log.e("AuthRepository", "Login failed: $errorMessage", e)
+                Log.e(TAG, "Login failed: $errorMessage", e)
                 Result(success = false, errorMessage = errorMessage)
             }
         }
     }
 
     suspend fun register(userName: String, email: String, password: String, profileImage: Uri?): Result<AuthResponse> {
-        Log.d("AuthRepository", "Attempting to register with email: $email")
+        Log.d(TAG, "Attempting to register with email: $email")
         return withContext(Dispatchers.IO) {
             try {
                 var imagePart: MultipartBody.Part? = null;
@@ -67,32 +76,60 @@ class AuthRepository @Inject constructor(
                 if (!response.isSuccessful) {
                     throw IllegalStateException(response.errorBody()?.string())
                 }
-                Log.d("AuthRepository", "Registration successful")
+                Log.d(TAG, "Registration successful")
                 Result(success = true)
             } catch (e: Exception) {
                 val errorMessage = ErrorParser.parseHttpError(e)
-                Log.e("AuthRepository", "Registration failed: $errorMessage", e)
+                Log.e(TAG, "Registration failed: $errorMessage", e)
                 Result(success = false, errorMessage = errorMessage)
             }
         }
     }
 
     suspend fun logout(): Result<AuthResponse> {
-        Log.d("AuthRepository", "Attempting to log out")
+        Log.d(TAG, "Attempting to log out")
         return withContext(Dispatchers.IO) {
             try {
                 val response = authApi.logout()
                 if (!response.isSuccessful) {
                     throw IllegalStateException(response.errorBody()?.string())
                 }
-                tokenManager.clearTokens()
-                Log.d("AuthRepository", "Logout successful and tokens cleared")
-                    Result(success = true)
+                tokenManager.clearAllTokens()
+                Log.d(TAG, "Logout successful and tokens cleared")
+                Result(success = true)
             } catch (e: Exception) {
                 val errorMessage = ErrorParser.parseHttpError(e)
-                Log.e("AuthRepository", "Logout failed: $errorMessage", e)
+                Log.e(TAG, "Logout failed: $errorMessage", e)
                 Result(success = false, errorMessage = errorMessage)
             }
+        }
+    }
+
+    suspend fun updateFcmToken(): Result<Unit> = withContext(Dispatchers.IO) {
+        try {
+            val token = tokenManager.getFcmToken() ?: return@withContext Result(
+                success = false,
+                errorMessage = "Failed to get FCM token"
+            )
+
+            val requestBody = RequestHelper.createJsonRequestBody(
+                mapOf(
+                    "fcmToken" to token,
+                    "deviceId" to android.os.Build.MODEL
+                )
+            )
+
+            val response = authApi.updateFcmToken(requestBody)
+            if (!response.isSuccessful) {
+                throw IllegalStateException(response.errorBody()?.string())
+            }
+
+            Log.d(TAG, "FCM token updated successfully for device: ${android.os.Build.MODEL}")
+            Result(success = true)
+        } catch (e: Exception) {
+            val errorMessage = ErrorParser.parseHttpError(e)
+            Log.e(TAG, "Error updating FCM token: $errorMessage", e)
+            Result(success = false, errorMessage = errorMessage)
         }
     }
 }

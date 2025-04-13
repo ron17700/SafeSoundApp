@@ -8,12 +8,18 @@ import com.squareup.picasso.Picasso
 import okhttp3.MediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
+import org.json.JSONObject
 import java.io.File
 import java.io.FileOutputStream
 
 object RequestHelper {
     fun String.toRequestBody(): RequestBody =
         RequestBody.create(MediaType.parse("text/plain"), this)
+
+    fun createJsonRequestBody(data: Map<String, Any>): RequestBody {
+        val json = JSONObject(data)
+        return RequestBody.create(MediaType.parse("application/json"), json.toString())
+    }
 
     fun imageUriToMultiPart(context: Context, imageUri: Uri, fileNamePrefix: String = "image"): MultipartBody.Part {
         val bitmap: Bitmap?

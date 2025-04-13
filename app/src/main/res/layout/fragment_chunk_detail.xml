@@ -107,10 +107,9 @@
                     android:id="@+id/textViewEmptySummary"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Summary is being generated. Please check back later."
-                    android:textSize="16sp"
-                    android:textColor="@android:color/darker_gray"
-                    android:textStyle="italic"
+                    android:layout_marginTop="16dp"
+                    android:text="Summary is being generated or not available. Please check back later."
+                    android:textAlignment="center"
                     android:visibility="gone" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>

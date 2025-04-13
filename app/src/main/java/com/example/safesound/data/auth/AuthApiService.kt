@@ -8,6 +8,7 @@ import retrofit2.http.Body
 import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.Part
+import retrofit2.http.PUT
 
 interface AuthApiService {
 
@@ -28,4 +29,9 @@ interface AuthApiService {
 
     @POST("auth/logout")
     suspend fun logout(): Response<AuthResponse>
+
+    @PUT("/auth/fcm-token")
+    suspend fun updateFcmToken(
+        @Body body: RequestBody
+    ): Response<Unit>
 }
