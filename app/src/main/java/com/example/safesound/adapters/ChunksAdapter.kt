@@ -39,9 +39,10 @@ class ChunksAdapter(
             // Set class icon based on chunkClass
             val iconResId = when (chunk.chunkClass) {
                 "Natural" -> R.drawable.ic_natural
+                "In Progress" -> R.drawable.ic_progress
                 "Good" -> R.drawable.ic_good
                 "Bad" -> R.drawable.ic_bad
-                else -> R.drawable.ic_natural
+                else -> R.drawable.ic_progress
             }
             binding.imageViewChunkClassIcon.setImageResource(iconResId)
 
