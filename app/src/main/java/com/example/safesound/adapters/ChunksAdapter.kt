@@ -8,51 +8,90 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.safesound.R
 import com.example.safesound.data.records.Chunk
 import com.example.safesound.databinding.ItemChunkBinding
+import com.example.safesound.databinding.ItemSilentGroupBinding
+import com.example.safesound.ui.records.ChunkItem
 import com.example.safesound.utils.TimestampFormatter.formatIsoToTime
 
 class ChunksAdapter(
     private val onChunkClick: (Chunk) -> Unit
-) : ListAdapter<Chunk, ChunksAdapter.ChunkViewHolder>(ChunkDiffCallback()) {
+) : ListAdapter<ChunkItem, RecyclerView.ViewHolder>(ChunkItemDiffCallback()) {
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChunkViewHolder {
-        val binding = ItemChunkBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return ChunkViewHolder(binding, onChunkClick)
+    companion object {
+        private const val TYPE_REGULAR = 0
+        private const val TYPE_SILENT_GROUP = 1
     }
 
-    override fun onBindViewHolder(holder: ChunkViewHolder, position: Int) {
-        holder.bind(getItem(position))
+    override fun getItemViewType(position: Int): Int {
+        return when (getItem(position)) {
+            is ChunkItem.Regular -> TYPE_REGULAR
+            is ChunkItem.SilentGroup -> TYPE_SILENT_GROUP
+        }
     }
 
-    class ChunkViewHolder(private val binding: ItemChunkBinding,
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        return when (viewType) {
+            TYPE_REGULAR -> {
+                val binding = ItemChunkBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+                RegularViewHolder(binding, onChunkClick)
+            }
+            TYPE_SILENT_GROUP -> {
+                val binding = ItemSilentGroupBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+                SilentGroupViewHolder(binding)
+            }
+            else -> throw IllegalArgumentException("Invalid view type")
+        }
+    }
+
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        when (val item = getItem(position)) {
+            is ChunkItem.Regular -> (holder as RegularViewHolder).bind(item.chunk)
+            is ChunkItem.SilentGroup -> (holder as SilentGroupViewHolder).bind(item)
+        }
+    }
+
+    class RegularViewHolder(
+        private val binding: ItemChunkBinding,
         private val onChunkClick: (Chunk) -> Unit
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(chunk: Chunk) {
-            // Set chunk name
             binding.textViewChunkName.text = chunk.name
+            val start = formatIsoToTime(chunk.startTime)
+            val end = formatIsoToTime(chunk.endTime)
+            binding.textViewChunkDuration.text = "$start - $end"
 
-            // Set time frame
-            val formattedStartTime = formatIsoToTime(chunk.startTime)
-            val formattedEndTime = formatIsoToTime(chunk.endTime)
-            binding.textViewChunkDuration.text = "$formattedStartTime - $formattedEndTime"
-
-            // Set class icon based on chunkClass
-            val iconResId = when (chunk.chunkClass) {
-                "Natural" -> R.drawable.ic_natural
-                "Good" -> R.drawable.ic_good
-                "Bad" -> R.drawable.ic_bad
+            val isSilent = chunk.summary == "No meaningful audio detected"
+            val iconResId = when {
+                isSilent -> R.drawable.ic_silent
+                chunk.chunkClass == "Natural" -> R.drawable.ic_natural
+                chunk.chunkClass == "Good" -> R.drawable.ic_good
+                chunk.chunkClass == "Bad" -> R.drawable.ic_bad
                 else -> R.drawable.ic_natural
             }
             binding.imageViewChunkClassIcon.setImageResource(iconResId)
 
             binding.root.setOnClickListener {
-                onChunkClick(chunk)
+                if (!isSilent) onChunkClick(chunk)
             }
         }
     }
 
-    class ChunkDiffCallback : DiffUtil.ItemCallback<Chunk>() {
-        override fun areItemsTheSame(oldItem: Chunk, newItem: Chunk): Boolean = oldItem._id == newItem._id
-        override fun areContentsTheSame(oldItem: Chunk, newItem: Chunk): Boolean = oldItem == newItem
+    class SilentGroupViewHolder(
+        private val binding: ItemSilentGroupBinding
+    ) : RecyclerView.ViewHolder(binding.root) {
+
+        fun bind(group: ChunkItem.SilentGroup) {
+            binding.textViewTimeRange.text = "${formatIsoToTime(group.start)} - ${formatIsoToTime(group.end)}"
+        }
+    }
+
+    class ChunkItemDiffCallback : DiffUtil.ItemCallback<ChunkItem>() {
+        override fun areItemsTheSame(oldItem: ChunkItem, newItem: ChunkItem): Boolean {
+            return oldItem == newItem
+        }
+
+        override fun areContentsTheSame(oldItem: ChunkItem, newItem: ChunkItem): Boolean {
+            return oldItem == newItem
+        }
     }
 }
