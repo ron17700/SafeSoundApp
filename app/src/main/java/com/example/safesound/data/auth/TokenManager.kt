@@ -134,7 +134,6 @@ class TokenManager @Inject constructor(
         sharedPreferences.edit().apply {
             remove(ACCESS_TOKEN_KEY)
             remove(REFRESH_TOKEN_KEY)
-            remove(FCM_TOKEN_KEY)
             apply()
         }
         Log.d("TokenManager", "All tokens cleared successfully")
