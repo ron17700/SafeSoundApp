@@ -24,6 +24,7 @@ class TokenManager @Inject constructor(
         private const val PREFS_FILENAME = "SafeSoundPrefs"
         private const val ACCESS_TOKEN_KEY = "accessToken"
         private const val REFRESH_TOKEN_KEY = "refreshToken"
+        private const val FCM_TOKEN_KEY = "fcmToken"
     }
 
     private val sharedPreferences: SharedPreferences by lazy {
@@ -118,5 +119,23 @@ class TokenManager @Inject constructor(
         if (parts.size != 3) return JSONObject()
         val payload = String(Base64.decode(parts[1], Base64.URL_SAFE))
         return JSONObject(payload)
+    }
+
+    fun saveFcmToken(token: String) {
+        sharedPreferences.edit().putString(FCM_TOKEN_KEY, token).apply()
+        Log.d("TokenManager", "FCM token saved successfully")
+    }
+
+    fun getFcmToken(): String? {
+        return sharedPreferences.getString(FCM_TOKEN_KEY, null)
+    }
+
+    fun clearAllTokens() {
+        sharedPreferences.edit().apply {
+            remove(ACCESS_TOKEN_KEY)
+            remove(REFRESH_TOKEN_KEY)
+            apply()
+        }
+        Log.d("TokenManager", "All tokens cleared successfully")
     }
 }

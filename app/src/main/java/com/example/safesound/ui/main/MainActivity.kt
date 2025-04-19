@@ -1,7 +1,11 @@
 package com.example.safesound.ui.main
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
+import android.content.pm.PackageManager
+import android.Manifest
+import android.app.Activity
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -26,6 +30,9 @@ import com.example.safesound.ui.records.RecordCreationDialogFragment
 import com.example.safesound.ui.user.UsersViewModel
 import com.squareup.picasso.Picasso
 import dagger.hilt.android.AndroidEntryPoint
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.navigation.NavDestination
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -42,15 +49,38 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        requestNotificationPermission()
+        setupUI()
+        setupNavigation()
+        usersViewModel.getCurrentUser()
+        observeViewModel()
+    }
+
+    private fun requestNotificationPermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) 
+            != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                1
+            )
+        }
+    }
+
+    private fun setupUI() {
         setSupportActionBar(binding.appBarMain.toolbar)
 
         binding.appBarMain.fab.setOnClickListener { view ->
             val dialog = RecordCreationDialogFragment()
             dialog.show(supportFragmentManager, "RecordCreationDialog")
         }
+    }
+
+    private fun setupNavigation() {
         val drawerLayout: DrawerLayout = binding.drawerLayout
         val navView: NavigationView = binding.navView
         val navController = findNavController(R.id.nav_host_fragment_content_main)
+        
         appBarConfiguration = AppBarConfiguration(
             setOf(
                 R.id.nav_records_list,
@@ -59,50 +89,36 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_user_profile
             ), drawerLayout
         )
+        
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
 
         navController.addOnDestinationChangedListener { _, destination, arguments ->
-            val isTopLevelDestination =
-                appBarConfiguration.topLevelDestinations.contains(destination.id)
-            if (isTopLevelDestination) {
-                binding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
-            } else {
-                binding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
-            }
-            val shouldShowAddRecordButton = destination.id == R.id.nav_records_list
-            if (!shouldShowAddRecordButton) {
-                binding.appBarMain.fab.visibility = View.GONE
-            }
-            else {
-                binding.appBarMain.fab.visibility = View.VISIBLE
-            }
-
-            when (destination.id) {
-                R.id.nav_records_list -> {
-                    supportActionBar?.title = getString(R.string.menu_my_records)
-                }
-                R.id.nav_shared_records -> {
-                    supportActionBar?.title = getString(R.string.menu_shared_records)
-                }
-                R.id.nav_records_map -> {
-                    supportActionBar?.title = getString(R.string.menu_records_map)
-                }
-                R.id.nav_user_profile -> {
-                    supportActionBar?.title = getString(R.string.menu_user_profile)
-                }
-                R.id.recordChunksFragment -> {
-                    val recordName = arguments?.getString("recordName","")
-                    supportActionBar?.title = getString(R.string.dynamic_record_title, recordName)
-                }
-                R.id.chunkDetailFragment -> {
-                    val chunkName = arguments?.getString("chunkName","")
-                    supportActionBar?.title = getString(R.string.dynamic_chunk_title, chunkName)
-                }
-            }
+            handleDestinationChange(destination, arguments)
         }
-        usersViewModel.getCurrentUser()
-        observeViewModel()
+    }
+
+    private fun handleDestinationChange(destination: NavDestination, arguments: Bundle?) {
+        val isTopLevelDestination = appBarConfiguration.topLevelDestinations.contains(destination.id)
+        binding.drawerLayout.setDrawerLockMode(
+            if (isTopLevelDestination) DrawerLayout.LOCK_MODE_UNLOCKED
+            else DrawerLayout.LOCK_MODE_LOCKED_CLOSED
+        )
+
+        binding.appBarMain.fab.visibility = 
+            if (destination.id == R.id.nav_records_list) View.VISIBLE else View.GONE
+
+        supportActionBar?.title = when (destination.id) {
+            R.id.nav_records_list -> getString(R.string.menu_my_records)
+            R.id.nav_shared_records -> getString(R.string.menu_shared_records)
+            R.id.nav_records_map -> getString(R.string.menu_records_map)
+            R.id.nav_user_profile -> getString(R.string.menu_user_profile)
+            R.id.recordChunksFragment -> getString(R.string.dynamic_record_title, 
+                arguments?.getString("recordName", ""))
+            R.id.chunkDetailFragment -> getString(R.string.dynamic_chunk_title, 
+                arguments?.getString("chunkName", ""))
+            else -> supportActionBar?.title
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
